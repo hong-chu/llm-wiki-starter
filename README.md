@@ -50,14 +50,37 @@ sources arrive or the schema changes.
 
 ### What it is, on your computer
 
-An LLM-wiki is **a folder of files on your filesystem** — not an app,
-not a database, not a service. The folder can live anywhere a folder
-can live: a local directory, inside an Obsidian vault, in a git repo,
-in iCloud / Dropbox / Drive. The contents are plain text — mostly
-markdown (`.md`) — that you can read in any editor and inspect with
-`cat`, `grep`, or `ls`.
+**An LLM-wiki is a folder of files on your filesystem.** Mostly
+markdown — plain text you can `cat`, `grep`, open in any editor.
+The folder sits anywhere a folder sits: locally on disk, inside an
+Obsidian vault, in iCloud, in Dropbox, in a git repo on GitHub.
 
-The directory looks like this:
+You interact with that folder three ways:
+
+**1. Through an LLM agent that reads and writes it directly.** The
+agent is the only thing that *maintains* the wiki — it reads what's
+in `sources/`, writes pages into `wiki/`, appends to `log.md`, and
+follows the rules in `CLAUDE.md`. You talk to it in natural language
+(*"ingest the new paper I just dropped in,"* *"what do I know about
+X?"*) and it modifies the folder. Any agent that opens a local
+folder and follows project-level instructions works:
+**Claude Code**, **Codex CLI**, **Cursor**, **OpenClaw**.
+
+**2. Through a markdown viewer to read the result.** The wiki uses
+`[[wiki-links]]` to cross-reference pages, so
+[**Obsidian**](https://obsidian.md) is the natural fit — point it at
+the folder (*Open folder as vault*) and you get a navigable knowledge
+graph with backlinks, full-text search, and a graph view of how
+everything connects. VS Code, vim, or any markdown reader works too
+if you just want one page at a time.
+
+**3. Through the filesystem itself, for everything else.** Drag a
+new source into `sources/` in Finder. Sync the folder via iCloud to
+read it on another device. Version it with git. Back it up by
+copying the folder. The data is just files; the knowledge is
+portable.
+
+Here's what the folder looks like:
 
 ```
 your-wiki/
@@ -77,29 +100,8 @@ your-wiki/
 ```
 
 One file is special: **`CLAUDE.md`** at the root (or `AGENTS.md` —
-same role, different convention). Agents like Claude Code, Codex,
-and Cursor load it automatically when they open the folder. That's
-how the agent knows what to do.
-
-**How you actually interact with it:**
-
-- **Read** the wiki by opening the folder in a markdown viewer.
-  [**Obsidian**](https://obsidian.md) is the natural fit because the
-  wiki uses `[[wiki-links]]` for cross-references — Obsidian resolves
-  them natively, gives you bidirectional backlinks, and a graph view
-  of how pages connect. VS Code, vim, or even TextEdit work fine for
-  individual pages.
-- **Add sources** by dropping files into `sources/` — drag-and-drop
-  in Finder, `cp` from the terminal, however you'd normally move
-  files around.
-- **Edit the schema** (`CLAUDE.md`) when you want the agent to behave
-  differently. Open it in any editor and change the rules.
-- **Ask the agent** to `ingest`, `query`, or `lint`. You're talking
-  to Claude Code, Codex, or Cursor — they open the folder, read
-  `CLAUDE.md`, and act on the rest.
-- **Sync, back up, version-control** the folder however you'd handle
-  any other folder. The data is yours; nothing here depends on a
-  specific tool.
+same role, different convention). Agents auto-load it when they open
+the folder; that's how they know what to do.
 
 **Four operations** run against this structure:
 
