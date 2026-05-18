@@ -2,89 +2,47 @@
 
 A minimal, domain-agnostic template for building a personal knowledge
 base that an LLM keeps maintained for you. You curate sources; an
-agent reads them, writes the wiki, keeps it tidy. Pattern from
+agent writes and maintains the wiki. Pattern from
 [Andrej Karpathy's *LLM Wiki* gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
-## What is LLM-wiki?
+## What is an LLM-wiki?
 
-Most LLM-over-documents setups today are some flavor of RAG: you
-upload a pile of files, the model retrieves a few chunks at query
-time, generates an answer, and forgets everything. Ask the same
-question tomorrow and the model rediscovers it from scratch. Nothing
-accumulates.
+Most LLM-over-documents setups today are RAG: index a pile of files,
+retrieve top-k chunks at query time, generate an answer, forget. Ask
+the same question tomorrow and the model rediscovers it from scratch.
+Nothing accumulates.
 
-An LLM-wiki flips that. Sources still arrive as raw files, but an
-agent now *maintains* a derived markdown layer between you and them —
-a structured, interlinked wiki it owns and updates. Each ingest
-leaves durable prose behind: a new concept page, an extended entity,
-a flagged contradiction, an updated index. Future questions read
-what's already been thought through. The wiki compounds.
+An LLM-wiki flips this. Sources still arrive as raw files, but an
+agent *maintains* a derived markdown layer between you and them — a
+structured, interlinked wiki it owns. Each ingest leaves durable
+prose behind: a new concept page, an extended entity, a flagged
+contradiction. Future questions read what's already been thought
+through. The wiki compounds.
 
-The unlock is maintenance cost. A personal wiki has always been a
-tempting idea (Vannevar Bush proposed the Memex in 1945), but no
-human has the patience to keep one current. LLMs do.
+The unlock is maintenance cost. Vannevar Bush proposed the same idea
+(Memex, 1945), but no human has the patience to keep a personal wiki
+current. LLMs do.
 
 ### The three-layer architecture
 
 | Layer | What lives there | Owner |
 |---|---|---|
-| **Sources** | Immutable raw inputs — papers, transcripts, blog clippings, screenshots, your own notes. | You curate; the agent reads but never writes. |
-| **Wiki** | Derived markdown — concepts, entities, syntheses, comparisons, questions, plus an `index.md` and `log.md`. | The agent owns and maintains it. |
-| **Schema** | A single `CLAUDE.md` (or `AGENTS.md`) file: page templates, ingest/query/lint workflows, style rules. | You and the agent co-evolve it. |
+| **Sources** | Immutable raw inputs — papers, transcripts, blog clippings, screenshots, your notes. | You curate; the agent reads but never writes. |
+| **Wiki** | Derived markdown — concepts, entities, syntheses, comparisons, questions, plus `index.md` and `log.md`. | The agent owns and maintains it. |
+| **Schema** | `CLAUDE.md` (or `AGENTS.md`): page templates, ingest/query/lint workflows, style rules. | You and the agent co-evolve it. |
 
-**Input → output, concretely.**
+## What it is, on your computer
 
-```
- sources/    ──┐
- (you drop)    │
-               ├──── ingest ────►   wiki/    ────►  you read,
- CLAUDE.md   ──┘                  (markdown)        query, export
- (you edit)
-```
+**A folder of files on your filesystem.** Mostly markdown — plain
+text you can `cat`, `grep`, open in any editor. The folder lives
+wherever you keep folders: a local directory, an Obsidian vault, an
+iCloud-synced directory, a git repo on GitHub.
 
-You curate `sources/` and co-author `CLAUDE.md`. The agent reads both
-at ingest time, transforms the sources according to the schema, and
-writes `wiki/`. You read the wiki, `query` against it, and build
-`derived/` artifacts from it; the agent keeps it updated whenever new
-sources arrive or the schema changes.
-
-### What it is, on your computer
-
-**An LLM-wiki is a folder of files on your filesystem.** Mostly
-markdown — plain text you can `cat`, `grep`, open in any editor.
-The folder sits anywhere a folder sits: locally on disk, inside an
-Obsidian vault, in iCloud, in Dropbox, in a git repo on GitHub.
-
-You interact with that folder three ways:
-
-**1. Through an LLM agent that reads and writes it directly.** The
-agent is the only thing that *maintains* the wiki — it reads what's
-in `sources/`, writes pages into `wiki/`, appends to `log.md`, and
-follows the rules in `CLAUDE.md`. You talk to it in natural language
-(*"ingest the new paper I just dropped in,"* *"what do I know about
-X?"*) and it modifies the folder. Any agent that opens a local
-folder and follows project-level instructions works:
-**Claude Code**, **Codex CLI**, **Cursor**, **OpenClaw**.
-
-**2. Through a markdown viewer to read the result.** The wiki uses
-`[[wiki-links]]` to cross-reference pages, so
-[**Obsidian**](https://obsidian.md) is the natural fit — point it at
-the folder (*Open folder as vault*) and you get a navigable knowledge
-graph with backlinks, full-text search, and a graph view of how
-everything connects. VS Code, vim, or any markdown reader works too
-if you just want one page at a time.
-
-**3. Through the filesystem itself, for everything else.** Drag a
-new source into `sources/` in Finder. Sync the folder via iCloud to
-read it on another device. Version it with git. Back it up by
-copying the folder. The data is just files; the knowledge is
-portable.
-
-Here's what the folder looks like:
+The directory looks like this:
 
 ```
 your-wiki/
-├── CLAUDE.md          ← schema (the agent reads this first)
+├── CLAUDE.md          ← schema (agents read this first)
 ├── README.md
 ├── sources/           ← Layer 1 — raw, immutable inputs (you curate)
 ├── wiki/              ← Layer 2 — agent-owned derived markdown
@@ -99,55 +57,60 @@ your-wiki/
 └── derived/           ← optional: charts, decks, exports
 ```
 
-One file is special: **`CLAUDE.md`** at the root (or `AGENTS.md` —
-same role, different convention). Agents auto-load it when they open
-the folder; that's how they know what to do.
+You interact with that folder three ways:
 
-**Four operations** run against this structure:
+1. **An LLM agent that reads and writes it directly.** The agent
+   maintains the wiki — reads `sources/`, writes pages into `wiki/`,
+   appends to `log.md`, follows the rules in `CLAUDE.md`. You speak
+   to it in natural language (*"ingest the new paper I just dropped
+   in"*; *"what do I know about X?"*) and it modifies the folder.
+   Works with **Claude Code**, **Codex CLI**, **Cursor**, **OpenClaw**.
+2. **A markdown viewer to read the result.** The wiki uses
+   `[[wiki-links]]` to cross-reference pages, so
+   [**Obsidian**](https://obsidian.md) is the natural fit — point it
+   at the folder (*Open folder as vault*) and you get a navigable
+   knowledge graph with backlinks, full-text search, and a graph view
+   of how pages connect. VS Code, vim, or any markdown reader works
+   too if you just want one page at a time.
+3. **The filesystem itself, for everything else.** Drag sources
+   into `sources/` via Finder. Sync via iCloud. Version with git.
+   Back up by copying the folder. The data is just files.
 
-- **`ingest`** — a new source appeared. The agent reads it, decides
-  whether it extends an existing page or warrants a new one, makes
-  the change, and appends to `log.md`.
-- **`query`** — you ask a question. The agent searches `wiki/` first,
-  falls back to `sources/`, and surfaces gaps as new entries in
-  `questions/`.
-- **`lint`** — a periodic hygiene pass: orphans, dead links, missing
+## How it works
+
+The agent runs four operations against the folder:
+
+- **`ingest`** — a new source arrived. The agent reads it, decides
+  whether to extend an existing page or create a new one, writes the
+  change, and appends to `log.md`.
+- **`query`** — you ask a question. The agent answers from `wiki/`
+  first, falls back to `sources/`, and surfaces gaps as new entries
+  in `questions/`.
+- **`lint`** — periodic hygiene: orphans, dead links, missing
   `## Sources` blocks, stale stubs.
 - **`recompile`** — the escape hatch. Delete `wiki/`, re-derive every
-  page from `sources/` + `CLAUDE.md`. Useful as a reproducibility
-  check.
+  page from `sources/` + `CLAUDE.md`. A reproducibility check.
 
 Two files do disproportionate work: `index.md` (the curated table of
-contents, hand-tended; not a wall of auto-generated links) and
-`log.md` (an append-only audit trail of every change, dated).
+contents, hand-tended; not auto-generated) and `log.md` (an
+append-only audit trail of every change, dated).
 
-## What's good about LLM-wiki (vs. traditional RAG)
+### Editing the schema is the loop
 
-The intro called this out — RAG re-derives, the wiki compounds — but
-the contrast deserves more.
+After your first ingest, you'll notice things you'd do differently —
+a page split where you'd have merged, the tone off, a template that
+doesn't fit your domain. **Don't fix the wiki by hand.** Edit
+`CLAUDE.md` instead, ask the agent to re-ingest, and the next pass
+produces what you wanted.
 
-**RAG and the wiki aren't competing for the same job.** RAG retrieves
-at query time: index a corpus, fetch the top-k chunks, let the model
-answer. Fast, cheap, scales to millions of documents. But the model's
-thinking never persists — every query starts from scratch.
+The schema is the contract; the wiki is its output. Iterating on the
+schema is how a generic template becomes *your* wiki. You can ask
+the agent to update `CLAUDE.md` for you — it just doesn't change the
+schema unilaterally; that stays human-initiated.
 
-A wiki shifts the work upstream. An agent reads the same sources but,
-at ingest time, *transforms* them: synthesizes a concept page,
-cross-links it to related concepts, flags contradictions across
-sources, queues open questions. That transformation is more expensive
-than embedding text — but every subsequent query reads the
-already-thought-through pages. The cost amortizes; the knowledge
-compounds.
+## LLM-wiki vs. RAG
 
-A few practical wins fall out of this:
-
-- **Cross-references are first-class.** Every wiki page links to ≥ 2 others; the link graph is part of the artifact. RAG chunks have no relationship to each other.
-- **Contradictions surface.** When two sources disagree, the wiki captures both in a `## Contradictions` section. RAG silently picks one chunk or averages them away.
-- **You can read it.** The wiki is just markdown — browse it, edit it, share it, version it with git, open it in Obsidian. A vector index is opaque.
-- **Audit is easy.** Every page cites its sources; `log.md` records every change. You can answer *"why does the system think X?"* by opening a file.
-- **Failures are fixable.** RAG's failure mode (retrieval miss) is silent. The wiki's failure mode (a bad summary baked into a page) is visible right there in the file — and `recompile` rebuilds from sources.
-
-|   | RAG | LLM-wiki |
+| | RAG | LLM-wiki |
 |---|---|---|
 | **What persists between queries** | Vectors of raw chunks | Synthesized markdown pages |
 | **Per-query cost** | Cheap | Cheap |
@@ -158,60 +121,54 @@ A few practical wins fall out of this:
 | **Human-readable** | No | Yes (`index.md`) |
 | **Sweet spot** | Massive, query-diverse | 10–1000 sources, repeated questions |
 
-Where the wiki *doesn't* win, see [**When not to use it**](#when-not-to-use-it) below.
+A wiki shifts the model's work upstream. RAG re-derives every query;
+the wiki transforms once at ingest, and every subsequent query reads
+the already-thought-through pages. The cost amortizes; the knowledge
+compounds.
+
+The practical wins:
+
+- **Cross-references are first-class.** The link graph is part of the artifact.
+- **Contradictions surface.** Two sources disagree → both captured in a `## Contradictions` section.
+- **You can read it.** Browse, edit, share, version with git, open in Obsidian. A vector index is opaque.
+- **Audit is easy.** Every page cites its sources; `log.md` records every change. *"Why does the system think X?"* → open a file.
+- **Failures are fixable.** RAG's failure mode (retrieval miss) is silent. The wiki's (a bad summary baked into a page) is visible in the file — and `recompile` rebuilds from sources.
 
 ## Use cases
 
 ### Personal
 
 - **Literature review** — papers in a domain, synthesized as you go.
-- **Research area** — a topic you're trying to master across textbooks, papers, and blog posts.
-- **Onboarding to a new domain** — a new job, a new stack, a new sub-field. The wiki becomes your ramp-up artifact.
-- **Long-running personal interest** — a hobby with a literature: climbing, fermentation, tea, Go.
+- **Research area** — a topic you're mastering across textbooks, papers, and blog posts.
+- **Onboarding to a new domain** — new job, new stack, new sub-field.
+- **Long-running personal interest** — a hobby with a literature.
 
 ### Team / enterprise
 
-The same pattern, applied as a *context layer* for an AI-augmented
-data or engineering team:
+Same pattern, applied as a *context layer* for an AI-augmented data
+or engineering team:
 
-- **Domain context** — the team's shared understanding of *what this thing actually is* (a payment, a market, an alert, a customer).
+- **Domain context** — *what this thing actually is* (a payment, a market, an alert, a customer).
 - **Playbooks** — runbooks, alert response, on-call procedures.
 - **Incident postmortems** — postmortems are sources; the wiki finds patterns across them.
 - **ML experiment & ablation log** — every experiment is a source; the wiki synthesizes *"what we've learned about X."*
 - **Architecture decisions (ADRs)** — proposals are sources; the wiki tracks themes, reversals, contradictions.
-- **Customer / user feedback** — support tickets, interviews, NPS responses; the wiki maintains a living *"why customers ask about X."*
+- **Customer / user feedback** — support tickets, interviews, NPS responses → a living *"why customers ask about X."*
 
 ### When *not* to use it
 
-- **Very large corpora** (>~1000 sources). Vector RAG scales better at that point.
+- **Very large corpora** (>~1000 sources). Vector RAG scales better.
 - **Pure lookup / search** ("find me the doc that says X"). Wiki transformations get in the way.
-- **Highly dynamic data** (real-time prices, logs, telemetry). Wikis are for slow-changing knowledge.
-- **Regulated content requiring verbatim retrieval and immutable lineage.** The transformation step complicates audit; raw retrieval is often the right call.
+- **Highly dynamic data** (prices, logs, telemetry). Wikis are for slow-changing knowledge.
+- **Regulated content requiring verbatim retrieval.** The transformation step complicates audit.
 
-## Implementation
+## Getting started
 
-### Prerequisites
+For workshop pre-work, see [**WORKSHOP.md**](WORKSHOP.md).
 
-- An LLM agent that reads a project-level instructions file: **Claude Code**, **Codex CLI**, or **Cursor**.
-- A markdown editor — **Obsidian** is recommended for graph view and native `[[wiki-links]]`, but anything that opens `.md` works.
+If you'd rather build a wiki without using this template, open
+Claude Code in an empty folder and paste:
 
-### Setup (pre-work)
-
-Before the workshop:
-
-1. **Clone the template.**
-   ```bash
-   git clone https://github.com/hong-chu/llm-wiki-starter.git my-wiki
-   cd my-wiki
-   ```
-
-2. **Pick a topic** narrow enough that ~10 sources can cover it meaningfully. *"Retrieval-augmented generation"* works; *"machine learning"* does not.
-
-That's all the pre-work. We'll customize `CLAUDE.md`, drop sources, and run the first `ingest` **together** during the workshop — the first ingest is a shared moment, and you'll get more out of it that way. See [WORKSHOP.md](WORKSHOP.md) for the full pre-work checklist.
-
-> **Don't want to clone?** Open Claude Code in an empty folder and
-> paste this prompt:
->
 > ```
 > Scaffold an LLM-wiki for the topic <YOUR TOPIC>, following the
 > pattern in Andrej Karpathy's gist
@@ -227,57 +184,13 @@ That's all the pre-work. We'll customize `CLAUDE.md`, drop sources, and run the 
 > Use kebab-case.md filenames, [[wiki-links]] for cross-references, and
 > end every page with a ## Sources section.
 > ```
->
-> The agent will create the structure from scratch. The result should
-> look like the tree above.
 
-### Your first ingest — what to expect
-
-Once you say `ingest`, the agent will:
-
-- Read each source. For any source without a sibling `*.meta.md`, generate one (title, author, date, URL, why-it-matters).
-- Decide for each source whether it warrants a new page or extends an existing one.
-- Generate concept and entity pages, draft a synthesis if multiple sources align on a theme, queue open questions in `questions/`.
-- Append a dated entry to `log.md`.
-- Update `index.md` if new top-level pages were created.
-
-A first ingest of 2–3 sources typically produces 5–10 wiki pages.
-Read what came out. Some will be exactly right; some will surprise
-you. Both are useful.
-
-### The three operations
-
-- **`ingest`** — new sources arrive; the wiki updates. The agent never modifies `sources/`.
-- **`query`** — ask the wiki a question. It answers from `wiki/` first, cites pages inline, and surfaces gaps as new `questions/` entries.
-- **`lint`** — a periodic hygiene pass. Every page has a one-liner, ≥ 2 outgoing links, and a `## Sources` section; `log.md` is dated; no orphans.
-
-### Editing the schema is the loop
-
-After your first ingest, you'll notice things you'd do differently —
-a page was split where you'd have merged, the tone is off, a template
-doesn't fit your domain. **Don't fix the wiki by hand.** Edit
-`CLAUDE.md` instead. Update the rule, ask the agent to re-ingest, and
-the next pass produces what you wanted.
-
-The schema is the contract; the wiki is its output. Iterating on the
-schema is how a generic template becomes *your* wiki.
-
-You don't have to type the edits manually — you can ask the agent to
-update `CLAUDE.md` for you (*"add a rule that every entity page
-includes a `## Timeline` section"*). The agent just doesn't change
-the schema on its own; that part stays human-initiated.
-
-### Optional: Obsidian
-
-Open the folder as an Obsidian vault (*Open folder as vault* →
-select `my-wiki/`). The `[[wiki-links]]` resolve natively, you get
-backlinks and graph view for free, and the file tree maps directly
-to the wiki structure.
+The agent will create the structure from scratch.
 
 ## Credit
 
 Pattern by [Andrej Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
-This template is just one concrete instantiation of it.
+This template is one concrete instantiation.
 
 ## License
 
