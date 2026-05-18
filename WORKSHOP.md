@@ -15,7 +15,7 @@ setup, and that everyone arrives with a real example to work with.
 
 2. **Clone this template** (1 min)
    ```bash
-   git clone <repo-url> my-wiki
+   git clone https://github.com/hong-chu/llm-wiki-starter.git my-wiki
    cd my-wiki
    ```
    Open the folder in Obsidian: *Open folder as vault* → select
