@@ -32,6 +32,22 @@ human has the patience to keep one current. LLMs do.
 | **Wiki** | Derived markdown — concepts, entities, syntheses, comparisons, questions, plus an `index.md` and `log.md`. | The agent owns and maintains it. |
 | **Schema** | A single `CLAUDE.md` (or `AGENTS.md`) file: page templates, ingest/query/lint workflows, style rules. | You and the agent co-evolve it. |
 
+**Input → output, concretely.**
+
+```
+ sources/    ──┐
+ (you drop)    │
+               ├──── ingest ────►   wiki/    ────►  you read,
+ CLAUDE.md   ──┘                  (markdown)        query, export
+ (you edit)
+```
+
+You curate `sources/` and co-author `CLAUDE.md`. The agent reads both
+at ingest time, transforms the sources according to the schema, and
+writes `wiki/`. You read the wiki, `query` against it, and build
+`derived/` artifacts from it; the agent keeps it updated whenever new
+sources arrive or the schema changes.
+
 ### The existence format
 
 On disk, an LLM-wiki is just a directory of markdown files:
