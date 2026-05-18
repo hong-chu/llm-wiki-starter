@@ -1,0 +1,7 @@
+.DS_Store
+.obsidian/
+.vscode/
+.idea/
+node_modules/
+*.tmp
+*.swp
