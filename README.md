@@ -48,9 +48,16 @@ writes `wiki/`. You read the wiki, `query` against it, and build
 `derived/` artifacts from it; the agent keeps it updated whenever new
 sources arrive or the schema changes.
 
-### The existence format
+### What it is, on your computer
 
-On disk, an LLM-wiki is just a directory of markdown files:
+An LLM-wiki is **a folder of files on your filesystem** — not an app,
+not a database, not a service. The folder can live anywhere a folder
+can live: a local directory, inside an Obsidian vault, in a git repo,
+in iCloud / Dropbox / Drive. The contents are plain text — mostly
+markdown (`.md`) — that you can read in any editor and inspect with
+`cat`, `grep`, or `ls`.
+
+The directory looks like this:
 
 ```
 your-wiki/
@@ -69,7 +76,32 @@ your-wiki/
 └── derived/           ← optional: charts, decks, exports
 ```
 
-Four operations run against this structure:
+One file is special: **`CLAUDE.md`** at the root (or `AGENTS.md` —
+same role, different convention). Agents like Claude Code, Codex,
+and Cursor load it automatically when they open the folder. That's
+how the agent knows what to do.
+
+**How you actually interact with it:**
+
+- **Read** the wiki by opening the folder in a markdown viewer.
+  [**Obsidian**](https://obsidian.md) is the natural fit because the
+  wiki uses `[[wiki-links]]` for cross-references — Obsidian resolves
+  them natively, gives you bidirectional backlinks, and a graph view
+  of how pages connect. VS Code, vim, or even TextEdit work fine for
+  individual pages.
+- **Add sources** by dropping files into `sources/` — drag-and-drop
+  in Finder, `cp` from the terminal, however you'd normally move
+  files around.
+- **Edit the schema** (`CLAUDE.md`) when you want the agent to behave
+  differently. Open it in any editor and change the rules.
+- **Ask the agent** to `ingest`, `query`, or `lint`. You're talking
+  to Claude Code, Codex, or Cursor — they open the folder, read
+  `CLAUDE.md`, and act on the rest.
+- **Sync, back up, version-control** the folder however you'd handle
+  any other folder. The data is yours; nothing here depends on a
+  specific tool.
+
+**Four operations** run against this structure:
 
 - **`ingest`** — a new source appeared. The agent reads it, decides
   whether it extends an existing page or warrants a new one, makes
