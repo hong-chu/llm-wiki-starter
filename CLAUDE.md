@@ -61,13 +61,17 @@ clean, interlinked set of pages under `wiki/`. You never modify
 
 ## Page templates
 
+Pages are written for *humans first* and agents second. Every page
+opens with a one-sentence summary as a markdown blockquote (`> …`),
+followed by structured prose, and closes with a `## Continue reading`
+footer that points the reader at 2–3 curated next pages. Wiki-links
+use `[[wiki-link]]` syntax; every page has a `## Sources` section.
+
 ### Concept page (`wiki/concepts/<slug>.md`)
 ```markdown
 # <Concept Name>
 
-**One-liner:** <single sentence definition>
-
-**Status:** stub | draft | stable
+> <single-sentence summary that doubles as a tagline>
 
 ## What it is
 <2–6 sentence explanation, plain English first>
@@ -88,14 +92,17 @@ clean, interlinked set of pages under `wiki/`. You never modify
 
 ## Sources
 - [[sources/<file>]] — <one-line note>
+
+## Continue reading
+- **<short reader-facing label>** → [[<target-page>]]
+- **<short reader-facing label>** → [[<target-page>]]
 ```
 
 ### Entity page (`wiki/entities/<slug>.md`)
 ```markdown
 # <Entity Name>
 
-**Type:** person | org | model | product | paper | dataset | benchmark
-**One-liner:** ...
+> <single-sentence summary including type if useful>
 
 ## Summary
 <who/what, 3–8 sentences>
@@ -114,18 +121,27 @@ clean, interlinked set of pages under `wiki/`. You never modify
 
 ## Sources
 - ...
+
+## Continue reading
+- **<label>** → [[<target>]]
+- **<label>** → [[<target>]]
 ```
 
 ### Synthesis (`wiki/syntheses/<slug>.md`)
 A short essay (300–800 words) that pulls from ≥ 2 sources to argue a
-non-obvious point or summarize a thread of work. Must cite each
-source.
+non-obvious point or summarize a thread of work. Open with a
+blockquote tagline; must cite each source; end with
+`## Continue reading`.
 
 ### Comparison (`wiki/comparisons/<slug>.md`)
-Use a table. Always include columns for: dimension, A, B, who-wins-when,
-sources. Below the table, a 1-paragraph "bottom line".
+Use a table. Always include columns for: dimension, A, B,
+who-wins-when, sources. Open with a blockquote tagline; below the
+table, a 1-paragraph "bottom line"; end with `## Continue reading`.
 
 ### Question (`wiki/questions/<slug>.md`)
+Question pages keep an explicit `**Status:**` line — readers care
+whether something is open or resolved.
+
 ```markdown
 # <The Question>
 
@@ -147,6 +163,10 @@ sources. Below the table, a 1-paragraph "bottom line".
 
 ## Sources
 - ...
+
+## Continue reading
+- **<label>** → [[<target>]]
+- **<label>** → [[<target>]]
 ```
 
 ## Workflows
@@ -172,8 +192,9 @@ sources. Below the table, a 1-paragraph "bottom line".
    `[mixture-of-experts](concepts/mixture-of-experts.md)`.
 
 ### `lint` — periodic hygiene pass
-- Every page has: H1, one-liner, ≥ 2 outgoing links, a `## Sources`
-  section.
+- Every page has: H1, blockquote one-liner, ≥ 2 outgoing links, a
+  `## Sources` section, and a `## Continue reading` footer (questions
+  also keep `**Status:**`).
 - No orphan pages: every page is reachable from `index.md` in ≤ 2 hops.
 - No dead `[[wiki-links]]`: target file must exist.
 - File names are `kebab-case.md`; no spaces, no upper-case.
