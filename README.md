@@ -5,6 +5,8 @@ base that an LLM keeps maintained for you. You curate sources; an
 agent writes and maintains the wiki. Pattern from
 [Andrej Karpathy's *LLM Wiki* gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
+![A snapshot of an LLM-wiki rendered in Obsidian — nodes color-coded by category: blue = concepts, orange = entities, green = syntheses, purple = comparisons, pink = open questions, gray = sources.](assets/graph.png)
+
 ---
 
 ## What is an LLM-wiki?
