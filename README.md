@@ -5,6 +5,8 @@ base that an LLM keeps maintained for you. You curate sources; an
 agent writes and maintains the wiki. Pattern from
 [Andrej Karpathy's *LLM Wiki* gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
+---
+
 ## What is an LLM-wiki?
 
 Most LLM-over-documents setups today are RAG: index a pile of files,
@@ -30,6 +32,8 @@ current. LLMs do.
 | **Sources** | Immutable raw inputs — papers, transcripts, blog clippings, screenshots, your notes. | You curate; the agent reads but never writes. |
 | **Wiki** | Derived markdown — concepts, entities, syntheses, comparisons, questions, plus `index.md` and `log.md`. | The agent owns and maintains it. |
 | **Schema** | `CLAUDE.md` (or `AGENTS.md`): page templates, ingest/query/lint workflows, style rules. | You and the agent co-evolve it. |
+
+---
 
 ## What it is, on your computer
 
@@ -76,6 +80,8 @@ You interact with that folder three ways:
    into `sources/` via Finder. Sync via iCloud. Version with git.
    Back up by copying the folder. The data is just files.
 
+---
+
 ## How it works
 
 The agent runs four operations against the folder:
@@ -108,6 +114,8 @@ schema is how a generic template becomes *your* wiki. You can ask
 the agent to update `CLAUDE.md` for you — it just doesn't change the
 schema unilaterally; that stays human-initiated.
 
+---
+
 ## LLM-wiki vs. RAG
 
 | | RAG | LLM-wiki |
@@ -133,6 +141,8 @@ The practical wins:
 - **You can read it.** Browse, edit, share, version with git, open in Obsidian. A vector index is opaque.
 - **Audit is easy.** Every page cites its sources; `log.md` records every change. *"Why does the system think X?"* → open a file.
 - **Failures are fixable.** RAG's failure mode (retrieval miss) is silent. The wiki's (a bad summary baked into a page) is visible in the file — and `recompile` rebuilds from sources.
+
+---
 
 ## Use cases
 
@@ -162,6 +172,8 @@ or engineering team:
 - **Highly dynamic data** (prices, logs, telemetry). Wikis are for slow-changing knowledge.
 - **Regulated content requiring verbatim retrieval.** The transformation step complicates audit.
 
+---
+
 ## Getting started
 
 For workshop pre-work, see [**WORKSHOP.md**](WORKSHOP.md).
@@ -186,6 +198,8 @@ Claude Code in an empty folder and paste:
 > ```
 
 The agent will create the structure from scratch.
+
+---
 
 ## Credit
 
