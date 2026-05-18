@@ -145,9 +145,9 @@ data or engineering team:
 - An LLM agent that reads a project-level instructions file: **Claude Code**, **Codex CLI**, or **Cursor**.
 - A markdown editor — **Obsidian** is recommended for graph view and native `[[wiki-links]]`, but anything that opens `.md` works.
 
-### Setup
+### Setup (pre-work)
 
-The full setup is five steps:
+Before the workshop:
 
 1. **Clone the template.**
    ```bash
@@ -157,16 +157,7 @@ The full setup is five steps:
 
 2. **Pick a topic** narrow enough that ~10 sources can cover it meaningfully. *"Retrieval-augmented generation"* works; *"machine learning"* does not.
 
-3. **Customize `CLAUDE.md`** — replace the `TL;DR for the agent` block with one sentence describing your topic. This is the only edit required to make the template yours; everything else in the schema you can iterate on after the first ingest.
-
-4. **Drop 2–3 sources into `sources/`** — papers, blog posts pasted as `.md`, transcripts, your notes.
-
-5. **Open the folder in your agent and say `ingest`.** The agent reads `sources/`, decides what pages to create, and starts filling out `wiki/`.
-
-> **For workshop participants:** steps 1–2 are your pre-work (see
-> [WORKSHOP.md](WORKSHOP.md)). We'll do steps 3–5 together during the
-> session — don't customize the schema, drop sources, or ingest
-> beforehand. The first ingest is a shared moment.
+That's all the pre-work. We'll customize `CLAUDE.md`, drop sources, and run the first `ingest` **together** during the workshop — the first ingest is a shared moment, and you'll get more out of it that way. See [WORKSHOP.md](WORKSHOP.md) for the full pre-work checklist.
 
 > **Don't want to clone?** Open Claude Code in an empty folder and
 > paste this prompt:
