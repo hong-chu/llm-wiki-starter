@@ -145,7 +145,9 @@ data or engineering team:
 - An LLM agent that reads a project-level instructions file: **Claude Code**, **Codex CLI**, or **Cursor**.
 - A markdown editor — **Obsidian** is recommended for graph view and native `[[wiki-links]]`, but anything that opens `.md` works.
 
-### Setup (5 minutes)
+### Setup
+
+The full setup is five steps:
 
 1. **Clone the template.**
    ```bash
@@ -153,13 +155,18 @@ data or engineering team:
    cd my-wiki
    ```
 
-2. **Pick a topic.** Narrow enough that ~10 sources can cover it meaningfully. *"Retrieval-augmented generation"* works; *"machine learning"* does not.
+2. **Pick a topic** narrow enough that ~10 sources can cover it meaningfully. *"Retrieval-augmented generation"* works; *"machine learning"* does not.
 
-3. **Customize `CLAUDE.md`.** Open it and replace the `TL;DR for the agent` block with one sentence describing your topic. This is the only edit required to make the template yours; everything else in the schema you can iterate on after the first ingest.
+3. **Customize `CLAUDE.md`** — replace the `TL;DR for the agent` block with one sentence describing your topic. This is the only edit required to make the template yours; everything else in the schema you can iterate on after the first ingest.
 
-4. **Drop 2–3 starter sources into `sources/`.** PDFs, blog posts pasted as `.md`, transcripts, your notes. Anything you've already engaged with and might want to remember.
+4. **Drop 2–3 sources into `sources/`** — papers, blog posts pasted as `.md`, transcripts, your notes.
 
 5. **Open the folder in your agent and say `ingest`.** The agent reads `sources/`, decides what pages to create, and starts filling out `wiki/`.
+
+> **For workshop participants:** steps 1–2 are your pre-work (see
+> [WORKSHOP.md](WORKSHOP.md)). We'll do steps 3–5 together during the
+> session — don't customize the schema, drop sources, or ingest
+> beforehand. The first ingest is a shared moment.
 
 > **Don't want to clone?** Open Claude Code in an empty folder and
 > paste this prompt:
