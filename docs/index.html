@@ -1,0 +1,1983 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLM-Wiki — Workshop Introduction</title>
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --panel: #ffffff;
+    --panel-alt: #f5f4ef;
+    --ink: #18181b;
+    --ink-soft: #71717a;
+    --line: #e4e4e7;
+    --line-soft: #efefe9;
+
+    --rag:  #1e40af;
+    --kg:   #b45309;
+    --wiki: #166534;
+
+    --rag-soft:  #eef2ff;
+    --kg-soft:   #fef3c7;
+    --wiki-soft: #dcfce7;
+
+    --type-concept:  #3b82f6;
+    --type-entity:   #f97316;
+    --type-synth:    #22c55e;
+    --type-compare:  #a855f7;
+    --type-question: #ec4899;
+    --type-source:   #94a3b8;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text",
+          "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 64px 32px 96px;
+    max-width: 1200px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── header ─── */
+  h1 {
+    font-size: 30px; font-weight: 700; letter-spacing: -0.5px;
+    margin: 0 0 12px;
+  }
+  .lede {
+    color: var(--ink-soft); font-size: 16.5px; line-height: 1.6;
+    max-width: 760px;
+    margin: 0 0 36px;
+  }
+
+  /* ─── tab nav ─── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin: 0 0 40px;
+    overflow-x: auto;
+  }
+  .tab {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 18px;
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: color 120ms, border-color 120ms;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--wiki);
+    font-weight: 600;
+  }
+  .tab .num {
+    font-family: "JetBrains Mono", "Menlo", monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-right: 8px;
+  }
+  .tab.active .num { color: var(--wiki); }
+
+  /* ─── panels ─── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  h2 {
+    font-size: 22px; font-weight: 700;
+    margin: 56px 0 16px; letter-spacing: -0.25px;
+  }
+  h2:first-child { margin-top: 0; }
+  h3 { font-size: 17px; font-weight: 700; margin: 0 0 8px; }
+  p  { margin: 0 0 12px; }
+
+  hr {
+    border: 0; border-top: 1px solid var(--line);
+    margin: 56px 0; height: 0;
+  }
+
+  /* ─── three column / panel layouts ─── */
+  .three {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    margin: 24px 0 0;
+  }
+  @media (max-width: 980px) { .three { grid-template-columns: 1fr; } }
+
+  .two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0 0;
+  }
+  @media (max-width: 800px) { .two { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px;
+  }
+  .panel-rag  { border-top: 2px solid var(--rag); }
+  .panel-kg   { border-top: 2px solid var(--kg); }
+  .panel-wiki { border-top: 2px solid var(--wiki); }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .tag.rag  { color: var(--rag);  background: var(--rag-soft); }
+  .tag.kg   { color: var(--kg);   background: var(--kg-soft); }
+  .tag.wiki { color: var(--wiki); background: var(--wiki-soft); }
+
+  .metaphor {
+    font-style: italic;
+    color: var(--ink-soft);
+    border-left: 2px solid var(--line);
+    padding: 4px 0 4px 14px;
+    margin: 8px 0 18px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .mechanism-label {
+    font-weight: 600; font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin: 18px 0 8px;
+  }
+
+  .diagram {
+    background: var(--panel-alt);
+    border-radius: 8px;
+    padding: 14px;
+    margin: 0 0 16px;
+  }
+  .diagram.large {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 28px;
+  }
+  .diagram svg { display: block; width: 100%; height: auto; }
+
+  ul.notes {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  ul.notes li { margin: 6px 0; }
+  ul.notes li strong { color: var(--ink); font-weight: 600; }
+
+  /* ─── tables ─── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 18px 0;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left; padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+    color: var(--ink);
+  }
+  th {
+    color: var(--ink-soft);
+    font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    background: var(--panel-alt);
+    border-bottom: 1px solid var(--line);
+  }
+  tr:last-child td { border-bottom: 0; }
+  td.label { font-weight: 600; color: var(--ink); }
+
+  th.h-rag  { color: var(--rag); }
+  th.h-kg   { color: var(--kg); }
+  th.h-wiki { color: var(--wiki); }
+
+  code {
+    font-family: "JetBrains Mono", "Menlo", "SF Mono", monospace;
+    font-size: 12.5px;
+    background: var(--panel-alt);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  pre {
+    font-family: "JetBrains Mono", "Menlo", "SF Mono", monospace;
+    font-size: 12.5px;
+    background: var(--panel-alt);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 16px 0;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  pre code { background: none; padding: 0; }
+
+  .punchline {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--wiki);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .punchline strong { color: var(--wiki); }
+
+  .callout {
+    background: var(--wiki-soft);
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 24px 0;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .callout strong { color: var(--wiki); }
+  .callout a { color: var(--wiki); font-weight: 600; }
+
+  /* ─── decision tree ─── */
+  .tree {
+    background: var(--panel-alt);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 24px;
+    font-family: "JetBrains Mono", "Menlo", monospace;
+    font-size: 13.5px;
+    color: var(--ink);
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.75;
+  }
+  .tree .q  { color: var(--ink); }
+  .tree .a  { color: var(--ink-soft); }
+  .tree .out-rag  { color: var(--rag);  font-weight: 700; }
+  .tree .out-kg   { color: var(--kg);   font-weight: 700; }
+  .tree .out-wiki { color: var(--wiki); font-weight: 700; }
+
+  /* ─── numbered steps (tab 4) ─── */
+  .steps { margin: 24px 0; }
+  .step {
+    display: flex; gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .step:last-child { border-bottom: 0; }
+  .step .step-num {
+    flex: 0 0 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--wiki);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .step .step-body h3 { margin: 4px 0 6px; }
+  .step .step-body p { color: var(--ink-soft); margin: 0; }
+  .step .step-body code { font-size: 12.5px; }
+
+  /* ─── sample wiki page mockup (tab 3) ─── */
+  .page-mockup {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 28px 32px;
+    box-shadow: 0 1px 0 var(--line);
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+  .page-mockup .page-h1 {
+    font-size: 22px; font-weight: 700; margin: 0 0 14px;
+    letter-spacing: -0.3px;
+  }
+  .page-mockup blockquote {
+    margin: 0 0 18px;
+    padding: 6px 0 6px 14px;
+    border-left: 3px solid var(--line);
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .page-mockup .page-h2 {
+    font-size: 15px; font-weight: 700; margin: 18px 0 8px;
+  }
+  .page-mockup p { font-size: 14.5px; line-height: 1.6; color: var(--ink); }
+  .page-mockup ul { margin: 8px 0; padding-left: 20px; color: var(--ink); }
+  .page-mockup .wlink {
+    color: var(--wiki); text-decoration: none;
+    border-bottom: 1px dotted var(--wiki);
+  }
+
+  /* ─── footer ─── */
+  footer {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    line-height: 1.7;
+  }
+  footer a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--ink-soft);
+  }
+
+  .hint {
+    color: var(--ink-soft); font-size: 14px;
+    margin: 4px 0 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>LLM-Wiki — Workshop Introduction</h1>
+<p class="lede">
+  An LLM-Wiki is a knowledge base where an LLM agent maintains a structured,
+  interlinked collection of markdown pages between you and your raw sources.
+  You curate, the agent writes, the wiki compounds. This page walks through
+  what it is, how it compares to the alternatives, how it actually works,
+  and how to start your own in under five minutes.
+</p>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-tab="1" role="tab"><span class="num">01</span>What is it</button>
+  <button class="tab" data-tab="2" role="tab"><span class="num">02</span>vs. RAG &amp; KG</button>
+  <button class="tab" data-tab="3" role="tab"><span class="num">03</span>How it works</button>
+  <button class="tab" data-tab="4" role="tab"><span class="num">04</span>Use cases</button>
+  <button class="tab" data-tab="5" role="tab"><span class="num">05</span>Try it</button>
+  <button class="tab" data-tab="6" role="tab"><span class="num">06</span>Best practices</button>
+  <button class="tab" data-tab="7" role="tab"><span class="num">07</span>Deeper lens<span style="margin-left: 6px; font-size: 11px; color: var(--ink-soft); font-style: italic; font-weight: 400;">optional</span></button>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 1 · WHAT IS IT                                                 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel active" data-tab="1">
+
+  <h2>The idea, in one paragraph</h2>
+  <p>
+    Most setups for asking an LLM about your documents work like this: index
+    a pile of files, retrieve relevant chunks at query time, generate an
+    answer, forget. Same question tomorrow → same retrieval, same answer,
+    same forgetting. Nothing accumulates.
+  </p>
+  <p>
+    An LLM-Wiki flips that. Sources still arrive as raw files, but now an
+    agent <em>maintains</em> a derived markdown layer in between — a
+    structured, interlinked wiki it owns and updates. Each ingest leaves
+    durable prose behind: a new concept page, an extended entity, a flagged
+    contradiction. Future questions read what's already been thought through.
+    The wiki <strong>compounds</strong>.
+  </p>
+
+  <div class="callout">
+    <strong>The unlock is maintenance cost.</strong> Vannevar Bush proposed
+    the same idea — the Memex — in <em>1945</em>. The bottleneck was always
+    that no human has the patience to keep a personal wiki current. LLMs do.
+  </div>
+
+  <h2>The picture</h2>
+  <p class="hint">You curate sources. The agent reads them and writes the wiki. You read what the agent wrote.</p>
+
+  <div class="diagram large">
+    <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-big" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#71717a"/>
+        </marker>
+        <marker id="arr-big-green" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#166534"/>
+        </marker>
+      </defs>
+
+      <!-- Column labels -->
+      <text x="100" y="32" fill="#71717a" font-size="11" text-anchor="middle" font-weight="600">YOU</text>
+      <text x="100" y="46" fill="#71717a" font-size="9.5" text-anchor="middle">(curator)</text>
+
+      <text x="320" y="32" fill="#71717a" font-size="11" text-anchor="middle" font-weight="600">AGENT</text>
+      <text x="320" y="46" fill="#71717a" font-size="9.5" text-anchor="middle">(maintainer)</text>
+
+      <text x="610" y="32" fill="#71717a" font-size="11" text-anchor="middle" font-weight="600">WIKI</text>
+      <text x="610" y="46" fill="#71717a" font-size="9.5" text-anchor="middle">(what you read)</text>
+
+      <!-- Sources column -->
+      <g>
+        <rect x="40"  y="80"  width="120" height="26" rx="3" fill="#fff" stroke="#a1a1aa"/>
+        <text x="100" y="97" fill="#18181b" font-size="11" text-anchor="middle">paper / PDF</text>
+
+        <rect x="40"  y="113" width="120" height="26" rx="3" fill="#fff" stroke="#a1a1aa"/>
+        <text x="100" y="130" fill="#18181b" font-size="11" text-anchor="middle">blog clipping</text>
+
+        <rect x="40"  y="146" width="120" height="26" rx="3" fill="#fff" stroke="#a1a1aa"/>
+        <text x="100" y="163" fill="#18181b" font-size="11" text-anchor="middle">transcript / notes</text>
+
+        <rect x="40"  y="179" width="120" height="26" rx="3" fill="#fff" stroke="#a1a1aa"/>
+        <text x="100" y="196" fill="#18181b" font-size="11" text-anchor="middle">screenshot</text>
+
+        <text x="100" y="232" fill="#71717a" font-size="11" text-anchor="middle" font-style="italic">sources/ folder</text>
+        <text x="100" y="248" fill="#71717a" font-size="10" text-anchor="middle">immutable; the agent never writes here</text>
+      </g>
+
+      <!-- Arrows: sources → agent -->
+      <line x1="160" y1="93"  x2="270" y2="135" stroke="#71717a" stroke-width="1.2" marker-end="url(#arr-big)"/>
+      <line x1="160" y1="126" x2="270" y2="140" stroke="#71717a" stroke-width="1.2" marker-end="url(#arr-big)"/>
+      <line x1="160" y1="159" x2="270" y2="145" stroke="#71717a" stroke-width="1.2" marker-end="url(#arr-big)"/>
+      <line x1="160" y1="192" x2="270" y2="150" stroke="#71717a" stroke-width="1.2" marker-end="url(#arr-big)"/>
+
+      <!-- Agent (circle) -->
+      <g>
+        <circle cx="320" cy="142" r="52" fill="#fff" stroke="#166534" stroke-width="2"/>
+        <text x="320" y="130" fill="#18181b" font-size="13" text-anchor="middle" font-weight="600">agent</text>
+        <text x="320" y="148" fill="#71717a" font-size="10" text-anchor="middle">reads sources</text>
+        <text x="320" y="162" fill="#71717a" font-size="10" text-anchor="middle">+ existing wiki</text>
+        <text x="320" y="176" fill="#71717a" font-size="10" text-anchor="middle">writes pages</text>
+
+        <!-- CLAUDE.md indicator -->
+        <rect x="270" y="220" width="100" height="22" rx="3" fill="#fff" stroke="#166534" stroke-dasharray="3,2"/>
+        <text x="320" y="235" fill="#166534" font-size="10.5" text-anchor="middle" font-weight="600">CLAUDE.md (schema)</text>
+        <line x1="320" y1="194" x2="320" y2="219" stroke="#166534" stroke-width="1" stroke-dasharray="2,2"/>
+      </g>
+
+      <!-- Arrow: agent → wiki -->
+      <line x1="372" y1="142" x2="500" y2="142" stroke="#166534" stroke-width="2.5" marker-end="url(#arr-big-green)"/>
+
+      <!-- WIKI: color-coded knowledge graph -->
+      <g>
+        <!-- edges -->
+        <g stroke="#a1a1aa" stroke-width="1" stroke-opacity="0.5" fill="none">
+          <line x1="560" y1="100" x2="660" y2="100"/>
+          <line x1="560" y1="100" x2="560" y2="190"/>
+          <line x1="560" y1="100" x2="620" y2="145"/>
+          <line x1="660" y1="100" x2="620" y2="145"/>
+          <line x1="660" y1="100" x2="700" y2="180"/>
+          <line x1="560" y1="190" x2="620" y2="145"/>
+          <line x1="620" y1="145" x2="700" y2="180"/>
+          <line x1="620" y1="145" x2="660" y2="215"/>
+          <line x1="700" y1="180" x2="660" y2="215"/>
+        </g>
+        <!-- nodes -->
+        <circle cx="560" cy="100" r="12" fill="#3b82f6"/>
+        <text x="560" y="87" fill="#18181b" font-size="10" text-anchor="middle">concept</text>
+
+        <circle cx="660" cy="100" r="12" fill="#3b82f6"/>
+        <text x="660" y="87" fill="#18181b" font-size="10" text-anchor="middle">concept</text>
+
+        <circle cx="620" cy="145" r="14" fill="#22c55e"/>
+        <text x="620" y="124" fill="#18181b" font-size="10" text-anchor="middle">synthesis</text>
+
+        <circle cx="560" cy="190" r="12" fill="#f97316"/>
+        <text x="540" y="210" fill="#18181b" font-size="10" text-anchor="middle">entity</text>
+
+        <circle cx="700" cy="180" r="12" fill="#f97316"/>
+        <text x="722" y="183" fill="#18181b" font-size="10" text-anchor="start">entity</text>
+
+        <circle cx="660" cy="215" r="10" fill="#ec4899"/>
+        <text x="676" y="235" fill="#18181b" font-size="10" text-anchor="start">question</text>
+
+        <text x="610" y="262" fill="#71717a" font-size="11" text-anchor="middle" font-style="italic">wiki/ folder — markdown pages, cross-linked</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Three layers as panels -->
+  <h2>Three layers, three owners</h2>
+  <div class="three">
+    <div class="panel">
+      <span class="tag wiki" style="background: #f1f5f9; color: #475569;">Layer 1</span>
+      <h3>Sources</h3>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        Raw, immutable inputs — papers, transcripts, blog clippings,
+        screenshots, your own notes.
+      </p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-top: 8px;">
+        <strong style="color: var(--ink);">You</strong> curate.
+        The agent reads but never writes here.
+      </p>
+    </div>
+
+    <div class="panel">
+      <span class="tag wiki" style="background: var(--wiki-soft); color: var(--wiki);">Layer 2</span>
+      <h3>The wiki</h3>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        Derived markdown — concepts, entities, syntheses, comparisons,
+        questions, plus <code>index.md</code> and <code>log.md</code>.
+      </p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-top: 8px;">
+        <strong style="color: var(--ink);">The agent</strong> owns and
+        maintains it.
+      </p>
+    </div>
+
+    <div class="panel">
+      <span class="tag wiki" style="background: #fef3c7; color: #b45309;">Layer 3</span>
+      <h3>The schema</h3>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        A single <code>CLAUDE.md</code> (or <code>AGENTS.md</code>) file —
+        page templates, ingest/query/lint workflows, style rules.
+      </p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-top: 8px;">
+        <strong style="color: var(--ink);">You + the agent</strong>
+        co-evolve it.
+      </p>
+    </div>
+  </div>
+
+  <h2>What it looks like on your computer</h2>
+  <p>An LLM-Wiki is <strong>a folder of files on your filesystem</strong>.
+  Not an app, not a database, not a service. The folder sits wherever
+  folders sit: a local directory, inside an Obsidian vault, in a git repo,
+  synced via iCloud or Dropbox.</p>
+
+  <pre><code>your-wiki/
+├── CLAUDE.md          ← schema (agents read this first)
+├── README.md
+├── sources/           ← Layer 1 — raw inputs (you curate)
+├── wiki/              ← Layer 2 — agent-owned markdown
+│   ├── index.md           hand-curated entry points
+│   ├── overview.md        narrative tour
+│   ├── log.md             append-only change log
+│   ├── concepts/          ideas, frameworks, terminology
+│   ├── entities/          people, orgs, products, papers
+│   ├── syntheses/         multi-source thematic essays
+│   ├── comparisons/       side-by-side: A vs. B
+│   └── questions/         open questions / FAQ
+└── derived/           ← optional charts, decks, exports</code></pre>
+
+  <h3 style="margin-top: 28px;">Three ways you interact with that folder</h3>
+  <ul>
+    <li><strong>Through an LLM agent</strong> — Claude Code, Codex CLI, Cursor, OpenClaw — that reads and writes the folder. You talk to it (*"ingest the new paper"*, *"what do I know about X?"*), it changes files.</li>
+    <li><strong>Through a markdown viewer</strong> — Obsidian is the natural fit. <code>[[wiki-links]]</code> resolve natively; you get backlinks and a graph view of how pages connect.</li>
+    <li><strong>Through the filesystem itself</strong> — drag sources in via Finder, version with git, sync via iCloud, back up by copying the folder. The data is just files.</li>
+  </ul>
+
+  <h2>What the key files look like</h2>
+  <p>Three files do most of the structural work. The excerpts below are real — pulled from the wiki this page is part of.</p>
+
+  <h3 style="margin-top: 24px; color: var(--wiki);">CLAUDE.md — the schema</h3>
+  <p style="color: var(--ink-soft); font-size: 14.5px;">The agent reads this on every open. Declares page templates, workflows, style rules. Co-evolves with use.</p>
+  <pre><code># CLAUDE.md — LLM Wiki Schema
+
+&gt; Pattern adapted from Karpathy's *llm-wiki* gist.
+
+## TL;DR for the agent
+
+You are the maintainer of a wiki about &lt;your topic&gt;. The user
+curates sources in `sources/`. You compile them into pages under
+`wiki/`. You never modify `sources/`. You always update `wiki/log.md`.
+
+## Page templates
+
+### Concept page (`wiki/concepts/&lt;slug&gt;.md`)
+Opens with a blockquote tagline, then sections:
+"What it is", "Why it matters", "Key ideas", "Related",
+"Sources", "Continue reading". Cross-references use [[wiki-links]].
+
+### Entity page
+Same shape with: Summary, Key facts, Timeline, Related,
+Sources, Continue reading.
+
+(Plus templates for synthesis, comparison, question.)
+
+## Workflows
+
+### `ingest` — new file appeared in `sources/`
+1. Read the source. Generate *.meta.md if missing.
+2. Decide: extend an existing page, or warrant a new one?
+3. Apply the change. Append to wiki/log.md.
+4. Update wiki/index.md if a new top-level page was created.
+
+### `lint` — periodic hygiene pass
+Every page has blockquote tagline, ≥ 2 outgoing links,
+## Sources, ## Continue reading. No orphans. No dead links.
+
+## Style rules
+- Short, plain sentences. One idea per page.
+- Cite everything. No claim without a source link.
+- Dates: ISO YYYY-MM-DD.</code></pre>
+
+  <h3 style="margin-top: 32px; color: var(--wiki);">wiki/index.md — the curated table of contents</h3>
+  <p style="color: var(--ink-soft); font-size: 14.5px;">Hand-curated by the agent. Each entry has a one-line description so a reader can scan and dive in.</p>
+  <pre><code># Index
+
+&gt; A curated table of contents. Every link has a one-line
+&gt; description so you can scan and dive in.
+
+If this is your first visit, start with [[overview]] for a
+narrative tour.
+
+## Concepts
+- [[concepts/llm-as-judge]] — using an LLM to score outputs
+- [[concepts/golden-dataset]] — the labelled benchmark you trust
+- [[concepts/eval-design]] — what makes a benchmark useful
+- [[concepts/evaluator-drift]] — when judges change their minds
+- [[concepts/chain-of-thought-eval]] — scoring the reasoning, not just the answer
+
+## Entities
+- [[entities/hendrycks]] — author of MMLU
+- [[entities/eleuther-ai]] — built lm-eval-harness
+- [[entities/percy-liang]] — leads HELM at Stanford
+
+## Syntheses
+- [[syntheses/when-llm-judges-fail]] — patterns of judge failure
+- [[syntheses/eval-vs-production-correlation]] — what really matters
+
+## Open questions
+- [[questions/how-to-eval-creativity]]
+- [[questions/handle-evaluator-drift]]</code></pre>
+
+  <h3 style="margin-top: 32px; color: var(--wiki);">wiki/log.md — the append-only change history</h3>
+  <p style="color: var(--ink-soft); font-size: 14.5px;">Every ingest, lint, or schema change appends an entry. Audit trail for the wiki. Newest at the top.</p>
+  <pre><code># Change Log
+
+Append-only. Newest at the top.
+
+---
+
+## 2026-05-18 — schema migration: human-friendly conventions
+- updated: CLAUDE.md page templates
+  - one-liner is now a blockquote (&gt; …) lead, not a labeled field
+  - **Status:** dropped from concept/entity/synthesis pages
+  - every page now ends with ## Continue reading footer
+- migrated all 18 existing pages to the new format
+
+## 2026-04-26 — ingest: hendrycks-mmlu-paper.pdf + helm-overview.md
+- created concepts: golden-dataset, eval-design, llm-as-judge,
+  chain-of-thought-eval, evaluator-drift
+- created entities: hendrycks, eleuther-ai, percy-liang
+- created syntheses: when-llm-judges-fail
+- queued questions: how-to-eval-creativity, handle-evaluator-drift
+
+## 2026-04-26 — wiki initialized
+- created: CLAUDE.md (schema, v1)
+- created: scaffolding under wiki/ and sources/
+- notes: ready to ingest sources.</code></pre>
+
+  <h2>Where the pattern comes from</h2>
+  <p>
+    Andrej Karpathy proposed the LLM-Wiki pattern as a public
+    <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" style="color: var(--wiki);">gist in April 2026</a>.
+    His framing:
+  </p>
+  <blockquote style="border-left: 3px solid var(--line); margin: 0 0 16px; padding: 4px 0 4px 16px; font-style: italic; color: var(--ink-soft);">
+    "Obsidian is the IDE; the LLM is the programmer; the wiki is the codebase."
+  </blockquote>
+  <p>
+    Karpathy positions the pattern as the resolution to a problem first
+    posed in <em>Vannevar Bush's "As We May Think"</em> (1945) —
+    the Memex idea — that has waited eighty years for a maintainer
+    that doesn't get bored.
+  </p>
+
+  <div class="callout">
+    <strong>Up next:</strong> see how the LLM-Wiki pattern differs from RAG
+    and Knowledge Graphs — both at the mechanism level and at the
+    complexity level — in <a href="#" onclick="goTab(2); return false;">Tab 02 · vs. RAG &amp; KG</a>.
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 2 · vs RAG & KG  (existing content, preserved)                 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" data-tab="2">
+
+  <h2>The three patterns</h2>
+
+  <div class="three">
+
+    <!-- ── RAG ── -->
+    <div class="panel panel-rag">
+      <span class="tag rag">Pattern 1 / RAG</span>
+      <h3>The warehouse with a scanner</h3>
+      <p class="metaphor">
+        A vast warehouse of unsorted books. When you ask a question, the
+        librarian uses a scanner to find books whose contents look
+        <em>similar</em> to your question, reads relevant pages aloud,
+        and re-shelves them. The same question tomorrow → the same sprint.
+        Nothing is learned.
+      </p>
+
+      <div class="mechanism-label">The mechanism · embeddings + vector index</div>
+      <div class="diagram">
+        <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr-rag" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#71717a"/>
+            </marker>
+          </defs>
+
+          <rect x="22" y="105" width="80" height="36" rx="4" fill="#ffffff" stroke="#71717a"/>
+          <text x="62" y="121" fill="#18181b" font-size="11" text-anchor="middle">your</text>
+          <text x="62" y="135" fill="#18181b" font-size="11" text-anchor="middle">question</text>
+
+          <line x1="102" y1="123" x2="128" y2="123" stroke="#71717a" stroke-width="1" marker-end="url(#arr-rag)"/>
+
+          <rect x="130" y="105" width="92" height="36" rx="4" fill="#ffffff" stroke="#1e40af"/>
+          <text x="176" y="121" fill="#18181b" font-size="11" text-anchor="middle">embedding</text>
+          <text x="176" y="135" fill="#71717a" font-size="10" text-anchor="middle">→ vector</text>
+
+          <line x1="222" y1="123" x2="248" y2="123" stroke="#71717a" stroke-width="1" marker-end="url(#arr-rag)"/>
+
+          <rect x="252" y="45" width="226" height="170" rx="6" fill="#ffffff" stroke="#1e40af" stroke-dasharray="3,3"/>
+          <text x="365" y="62" fill="#1e40af" font-size="10" text-anchor="middle" font-weight="600">VECTOR SPACE</text>
+
+          <circle cx="290" cy="90"  r="3" fill="#a1a1aa"/>
+          <circle cx="320" cy="110" r="3" fill="#a1a1aa"/>
+          <circle cx="360" cy="95"  r="3" fill="#a1a1aa"/>
+          <circle cx="400" cy="110" r="3" fill="#a1a1aa"/>
+          <circle cx="440" cy="100" r="3" fill="#a1a1aa"/>
+          <circle cx="285" cy="150" r="3" fill="#a1a1aa"/>
+          <circle cx="430" cy="170" r="3" fill="#a1a1aa"/>
+          <circle cx="310" cy="180" r="3" fill="#a1a1aa"/>
+          <circle cx="395" cy="195" r="3" fill="#a1a1aa"/>
+
+          <circle cx="365" cy="135" r="32" fill="none" stroke="#1e40af" stroke-dasharray="2,2"/>
+          <circle cx="365" cy="135" r="4" fill="#1e40af"/>
+
+          <text x="365" y="208" fill="#1e40af" font-size="10" text-anchor="middle">top-K nearest chunks</text>
+        </svg>
+      </div>
+
+      <ul class="notes">
+        <li><strong>It's similarity, not understanding.</strong> The system knows chunk-47's vector is close to your question's vector.</li>
+        <li><strong>Failures are silent.</strong> "Marketplace fairness" might miss a chunk that talks about "rebalancing orderbooks."</li>
+        <li><strong>Frozen at index time.</strong> Vectors don't update. Your phrasing has to live in their neighborhood.</li>
+      </ul>
+    </div>
+
+    <!-- ── KG ── -->
+    <div class="panel panel-kg">
+      <span class="tag kg">Pattern 2 / Knowledge Graph</span>
+      <h3>The card catalog</h3>
+      <p class="metaphor">
+        Every fact in every book has been extracted, normalized, and filed
+        as a typed card. You query by structured request and get precise
+        results. But someone had to design the card system — what types of
+        cards exist, what relationships are allowed — before the first card
+        could be filed.
+      </p>
+
+      <div class="mechanism-label">The mechanism · typed triples + ontology</div>
+      <div class="diagram">
+        <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr-kg" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#b45309"/>
+            </marker>
+          </defs>
+
+          <text x="250" y="30" fill="#71717a" font-size="10" text-anchor="middle" font-weight="600">TYPED GRAPH</text>
+
+          <circle cx="120" cy="85" r="30" fill="#ffffff" stroke="#b45309" stroke-width="1.4"/>
+          <text x="120" y="85" fill="#18181b" font-size="11" text-anchor="middle" font-weight="600">Hendrycks</text>
+          <text x="120" y="98" fill="#71717a" font-size="9" text-anchor="middle">:Person</text>
+
+          <circle cx="380" cy="85" r="30" fill="#ffffff" stroke="#b45309" stroke-width="1.4"/>
+          <text x="380" y="85" fill="#18181b" font-size="12" text-anchor="middle" font-weight="600">MMLU</text>
+          <text x="380" y="98" fill="#71717a" font-size="9" text-anchor="middle">:Benchmark</text>
+
+          <circle cx="120" cy="195" r="30" fill="#ffffff" stroke="#b45309" stroke-width="1.4"/>
+          <text x="120" y="195" fill="#18181b" font-size="12" text-anchor="middle" font-weight="600">Liang</text>
+          <text x="120" y="208" fill="#71717a" font-size="9" text-anchor="middle">:Person</text>
+
+          <circle cx="380" cy="195" r="30" fill="#ffffff" stroke="#b45309" stroke-width="1.4"/>
+          <text x="380" y="194" fill="#18181b" font-size="12" text-anchor="middle" font-weight="600">HELM</text>
+          <text x="380" y="208" fill="#71717a" font-size="9" text-anchor="middle">:Suite</text>
+
+          <line x1="150" y1="85" x2="350" y2="85" stroke="#b45309" stroke-width="1.4" marker-end="url(#arr-kg)"/>
+          <text x="250" y="77" fill="#b45309" font-size="11" text-anchor="middle" font-style="italic">invented</text>
+
+          <line x1="120" y1="115" x2="120" y2="165" stroke="#b45309" stroke-width="1.4" marker-end="url(#arr-kg)"/>
+          <text x="105" y="143" fill="#b45309" font-size="11" text-anchor="end" font-style="italic">studied with</text>
+
+          <line x1="380" y1="115" x2="380" y2="165" stroke="#b45309" stroke-width="1.4" marker-end="url(#arr-kg)"/>
+          <text x="395" y="143" fill="#b45309" font-size="11" text-anchor="start" font-style="italic">part of</text>
+
+          <line x1="150" y1="100" x2="350" y2="185" stroke="#b45309" stroke-width="1" stroke-opacity="0.4" marker-end="url(#arr-kg)"/>
+        </svg>
+      </div>
+
+      <ul class="notes">
+        <li><strong>Triples (subject → predicate → object).</strong> Every fact is structured: <code>(Beer)—invented→(VSM)</code>.</li>
+        <li><strong>Ontology is the schema.</strong> If <code>refutes</code> isn't in it, you can't represent disagreement.</li>
+        <li><strong>Multi-hop traversal is the superpower.</strong> "All proteins encoded by genes on chromosome 17 expressed in liver tissue" — RAG can't, KG can.</li>
+      </ul>
+    </div>
+
+    <!-- ── LLM-Wiki ── -->
+    <div class="panel panel-wiki">
+      <span class="tag wiki">Pattern 3 / LLM-Wiki</span>
+      <h3>The personal library + librarian</h3>
+      <p class="metaphor">
+        A modest library of books you care about. A great librarian read
+        every one, wrote a Wikipedia-style article per concept, cross-linked
+        the articles, flagged contradictions, and keeps a dated log of every
+        change. When you ask, they hand you the article — already written,
+        already linked, already curated.
+      </p>
+
+      <div class="mechanism-label">The mechanism · agent-synthesized markdown pages</div>
+      <div class="diagram">
+        <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr-gray2" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#a1a1aa"/>
+            </marker>
+            <marker id="arr-green2" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#166534"/>
+            </marker>
+          </defs>
+
+          <text x="60" y="32" fill="#71717a" font-size="10" text-anchor="middle" font-weight="600">SOURCES</text>
+          <text x="200" y="32" fill="#71717a" font-size="10" text-anchor="middle" font-weight="600">AGENT</text>
+          <text x="385" y="32" fill="#71717a" font-size="10" text-anchor="middle" font-weight="600">WIKI</text>
+
+          <rect x="20" y="60"  width="80" height="22" rx="3" fill="#ffffff" stroke="#a1a1aa"/>
+          <text x="60" y="75" fill="#18181b" font-size="10.5" text-anchor="middle">paper</text>
+
+          <rect x="20" y="90"  width="80" height="22" rx="3" fill="#ffffff" stroke="#a1a1aa"/>
+          <text x="60" y="105" fill="#18181b" font-size="10.5" text-anchor="middle">talk notes</text>
+
+          <rect x="20" y="120" width="80" height="22" rx="3" fill="#ffffff" stroke="#a1a1aa"/>
+          <text x="60" y="135" fill="#18181b" font-size="10.5" text-anchor="middle">blog post</text>
+
+          <rect x="20" y="150" width="80" height="22" rx="3" fill="#ffffff" stroke="#a1a1aa"/>
+          <text x="60" y="165" fill="#18181b" font-size="10.5" text-anchor="middle">PDF</text>
+
+          <text x="60" y="195" fill="#71717a" font-size="9.5" text-anchor="middle" font-style="italic">immutable</text>
+
+          <line x1="100" y1="71"  x2="160" y2="115" stroke="#a1a1aa" stroke-width="1" marker-end="url(#arr-gray2)"/>
+          <line x1="100" y1="101" x2="160" y2="120" stroke="#a1a1aa" stroke-width="1" marker-end="url(#arr-gray2)"/>
+          <line x1="100" y1="131" x2="160" y2="125" stroke="#a1a1aa" stroke-width="1" marker-end="url(#arr-gray2)"/>
+          <line x1="100" y1="161" x2="160" y2="130" stroke="#a1a1aa" stroke-width="1" marker-end="url(#arr-gray2)"/>
+
+          <circle cx="200" cy="122" r="38" fill="#ffffff" stroke="#166534" stroke-width="2"/>
+          <text x="200" y="115" fill="#18181b" font-size="11" text-anchor="middle" font-weight="600">agent</text>
+          <text x="200" y="129" fill="#71717a" font-size="9" text-anchor="middle">reads,</text>
+          <text x="200" y="142" fill="#71717a" font-size="9" text-anchor="middle">synthesizes,</text>
+          <text x="200" y="155" fill="#71717a" font-size="9" text-anchor="middle">writes</text>
+
+          <line x1="238" y1="122" x2="280" y2="122" stroke="#166534" stroke-width="2" marker-end="url(#arr-green2)"/>
+
+          <g stroke="#a1a1aa" stroke-width="1" stroke-opacity="0.5" fill="none">
+            <line x1="335" y1="80"  x2="430" y2="80"/>
+            <line x1="335" y1="80"  x2="335" y2="170"/>
+            <line x1="335" y1="80"  x2="395" y2="120"/>
+            <line x1="430" y1="80"  x2="395" y2="120"/>
+            <line x1="430" y1="80"  x2="465" y2="155"/>
+            <line x1="335" y1="170" x2="395" y2="120"/>
+            <line x1="395" y1="120" x2="465" y2="155"/>
+            <line x1="395" y1="120" x2="430" y2="195"/>
+          </g>
+
+          <circle cx="335" cy="80"  r="11" fill="#3b82f6"/>
+          <text x="335" y="68" fill="#18181b" font-size="9" text-anchor="middle">MMLU</text>
+          <circle cx="430" cy="80"  r="11" fill="#3b82f6"/>
+          <text x="430" y="68" fill="#18181b" font-size="9" text-anchor="middle">llm-judge</text>
+          <circle cx="395" cy="120" r="13" fill="#22c55e"/>
+          <text x="395" y="142" fill="#18181b" font-size="9" text-anchor="middle">synthesis</text>
+          <circle cx="335" cy="170" r="11" fill="#f97316"/>
+          <text x="335" y="190" fill="#18181b" font-size="9" text-anchor="middle">Hendrycks</text>
+          <circle cx="465" cy="155" r="11" fill="#f97316"/>
+          <text x="465" y="175" fill="#18181b" font-size="9" text-anchor="middle">Liang</text>
+          <circle cx="430" cy="195" r="9" fill="#ec4899"/>
+          <text x="430" y="213" fill="#18181b" font-size="9" text-anchor="middle">?</text>
+
+          <g font-size="8.5" fill="#71717a">
+            <circle cx="290" cy="220" r="4" fill="#3b82f6"/>
+            <text x="297" y="223" text-anchor="start">concept</text>
+            <circle cx="345" cy="220" r="4" fill="#f97316"/>
+            <text x="352" y="223" text-anchor="start">entity</text>
+            <circle cx="390" cy="220" r="4" fill="#22c55e"/>
+            <text x="397" y="223" text-anchor="start">synthesis</text>
+            <circle cx="445" cy="220" r="4" fill="#ec4899"/>
+            <text x="452" y="223" text-anchor="start">question</text>
+          </g>
+        </svg>
+      </div>
+
+      <ul class="notes">
+        <li><strong>The wiki is a graph of pages.</strong> Each page is a synthesis, not a summary. Edges are <code>[[wiki-links]]</code> drawn in the prose.</li>
+        <li><strong>The agent does cognitive work at ingest.</strong> Decides what to extend, what to create, what to cross-link. <em>This is the move RAG and KG don't have.</em></li>
+        <li><strong>It compounds.</strong> Each new source improves multiple pages, not just one. The graph grows denser with use.</li>
+        <li><strong>Just markdown.</strong> Humans can read it. Git can version it. No lock-in, no specialized tools.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <hr>
+  <h2>Side-by-side · the mechanism</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+        <th class="h-rag">RAG</th>
+        <th class="h-kg">Knowledge Graph</th>
+        <th class="h-wiki">LLM-Wiki</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="label">What gets stored</td><td>Vectors of raw chunks</td><td>Typed triples</td><td>Synthesized markdown pages</td></tr>
+      <tr><td class="label">How retrieval works</td><td>Top-K nearest vectors</td><td>Structured query → graph traversal</td><td>Agent reads relevant pages directly</td></tr>
+      <tr><td class="label">Reasoning at ingest?</td><td>No — just embed</td><td>Extract typed triples per schema</td><td><strong>Yes</strong> — synthesis, cross-link, flag contradictions</td></tr>
+      <tr><td class="label">Schema design upfront?</td><td>None</td><td>Heavy (formal ontology)</td><td>Light (CLAUDE.md; evolves)</td></tr>
+      <tr><td class="label">Cross-references</td><td>None</td><td>Typed, structured</td><td>Untyped, prose-embedded</td></tr>
+      <tr><td class="label">Auditability</td><td>Opaque — why this chunk?</td><td>Structured provenance</td><td>Cited markdown + dated log.md</td></tr>
+      <tr><td class="label">Human-readable</td><td>No</td><td>With specialized tools</td><td>Yes — just markdown</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <hr>
+  <h2>Time &amp; space complexity</h2>
+
+  <p style="color: var(--ink-soft); font-size: 14px;">
+    Variables: <code>N</code> = chunks (RAG) or sources/pages (wiki);
+    <code>L</code> = avg chunk/page length;
+    <code>d</code> = embedding dimension (~1536);
+    <code>K</code> = top-K retrieved or pages read;
+    <code>T</code> = triples; <code>h</code> = hops; <code>LLM</code> = forward-pass cost.
+  </p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+        <th class="h-rag">RAG</th>
+        <th class="h-kg">Knowledge Graph</th>
+        <th class="h-wiki">LLM-Wiki</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="label">Ingest per source</td><td><code>O(L)</code> embed + <code>O(d · log N)</code> insert</td><td><code>O(L · LLM)</code> extract triples</td><td><code>O((L + K·L) · LLM)</code> synthesis</td></tr>
+      <tr><td class="label">One-time setup</td><td>None</td><td>Heavy: ontology (human-weeks)</td><td>Light: CLAUDE.md (human-hours)</td></tr>
+      <tr><td class="label">Query</td><td><code>O(d · log N)</code> + <code>O(K · L · LLM)</code></td><td><code>O(h · log T · branching)</code> — <em>no LLM</em></td><td><code>O(K · L · LLM)</code></td></tr>
+      <tr><td class="label">Storage</td><td><code>O(N · d)</code> — typically <strong>GB</strong></td><td><code>O(T)</code> — typically <strong>MB–GB</strong></td><td><code>O(N · L)</code> — typically <strong>MB</strong></td></tr>
+      <tr><td class="label">Calibration</td><td>1M chunks at d=1536 → ~6 GB; query ~1 s</td><td>1M triples → ~50–500 MB; query 10–100 ms</td><td>100 pages → ~1 MB; query 1–3 s</td></tr>
+      <tr><td class="label">Scales gracefully to</td><td>N ≈ 10⁸+</td><td>T ≈ 10⁹+</td><td>N ≈ 10² – 10³</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="punchline">
+    <strong>The honest punchlines.</strong>
+    RAG = <em>cheap ingest, fat storage, query cost dominated by an LLM reading chunks.</em>
+    KG = <em>expensive ingest, modest storage, query cost is structural — no LLM in the retrieval step.</em>
+    LLM-Wiki = <em>expensive ingest (the agent does cognitive work), tiny storage, query cost dominated by an LLM reading a few pages.</em>
+    The wiki is only feasible because LLMs are now cheap enough to do per-source synthesis at all.
+  </div>
+
+  <hr>
+  <h2>When to use which</h2>
+
+  <div class="tree"><span class="q">Is your corpus huge (≫1K sources) AND queries diverse?</span>
+   └── yes → <span class="out-rag">RAG</span>
+
+<span class="q">Do you need typed, multi-hop reasoning</span>
+<span class="q">  (e.g. "all proteins that interact with X expressed in tissue Y")?</span>
+   └── yes → <span class="out-kg">Knowledge Graph</span>
+
+<span class="q">Do humans need to read it AND the same questions recur</span>
+<span class="q">  AND audit / explainability matter?</span>
+   └── yes → <span class="out-wiki">LLM-Wiki</span>
+
+<span class="a">Two yeses?  →  hybrid territory (graph-RAG, wiki + RAG, KG + wiki).</span>
+</div>
+
+  <hr>
+  <h2>Real-world hybrids</h2>
+
+  <ul style="line-height: 1.7;">
+    <li><strong>Graph-RAG.</strong> A knowledge graph replaces the vector index. Retrieval is graph traversal rather than vector similarity. Wins when relationships matter more than text similarity.</li>
+    <li><strong>Wiki + RAG.</strong> Wiki for stable, repeatedly-queried concepts; RAG for the long tail of fresh material you haven't synthesized yet.</li>
+    <li><strong>KG + Wiki.</strong> KG holds the typed backbone; wiki holds prose explanations, open questions, contradictions.</li>
+  </ul>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 3 · HOW IT WORKS                                               -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" data-tab="3">
+
+  <h2>The four operations</h2>
+  <p>The wiki has a small, fixed vocabulary of things you ask the agent to do.
+  Each is a verb that operates on the same folder.</p>
+
+  <div class="diagram large">
+    <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-flow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#166534"/>
+        </marker>
+        <marker id="arr-soft" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#a1a1aa"/>
+        </marker>
+      </defs>
+
+      <!-- Sources box on left -->
+      <rect x="40" y="120" width="120" height="50" rx="6" fill="#fff" stroke="#71717a"/>
+      <text x="100" y="140" fill="#18181b" font-size="12" text-anchor="middle" font-weight="600">sources/</text>
+      <text x="100" y="156" fill="#71717a" font-size="10" text-anchor="middle">raw files</text>
+
+      <!-- Wiki box in middle -->
+      <rect x="320" y="100" width="160" height="90" rx="8" fill="#fff" stroke="#166534" stroke-width="2"/>
+      <text x="400" y="125" fill="#18181b" font-size="13" text-anchor="middle" font-weight="600">wiki/</text>
+      <text x="400" y="143" fill="#71717a" font-size="10" text-anchor="middle">cross-linked pages</text>
+      <text x="400" y="158" fill="#71717a" font-size="10" text-anchor="middle">index.md · log.md</text>
+      <text x="400" y="178" fill="#166534" font-size="10" text-anchor="middle" font-style="italic">the living artifact</text>
+
+      <!-- Answer on right -->
+      <rect x="640" y="120" width="120" height="50" rx="6" fill="#fff" stroke="#71717a"/>
+      <text x="700" y="140" fill="#18181b" font-size="12" text-anchor="middle" font-weight="600">answer</text>
+      <text x="700" y="156" fill="#71717a" font-size="10" text-anchor="middle">with citations</text>
+
+      <!-- ingest arrow: sources → wiki -->
+      <line x1="160" y1="145" x2="320" y2="145" stroke="#166534" stroke-width="2.5" marker-end="url(#arr-flow)"/>
+      <text x="240" y="135" fill="#166534" font-size="13" text-anchor="middle" font-weight="700">ingest</text>
+      <text x="240" y="162" fill="#71717a" font-size="10" text-anchor="middle">new source → updated pages</text>
+
+      <!-- query arrow: wiki → answer -->
+      <line x1="480" y1="145" x2="640" y2="145" stroke="#166534" stroke-width="2.5" marker-end="url(#arr-flow)"/>
+      <text x="560" y="135" fill="#166534" font-size="13" text-anchor="middle" font-weight="700">query</text>
+      <text x="560" y="162" fill="#71717a" font-size="10" text-anchor="middle">read pages → answer</text>
+
+      <!-- lint loop on wiki -->
+      <path d="M 400 100 C 400 60, 460 60, 460 100" fill="none" stroke="#166534" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr-flow)"/>
+      <text x="430" y="55" fill="#166534" font-size="11" text-anchor="middle" font-weight="600">lint</text>
+      <text x="430" y="68" fill="#71717a" font-size="9" text-anchor="middle">periodic hygiene</text>
+
+      <!-- recompile arrow: sources → wiki (curved, dashed, going under) -->
+      <path d="M 100 170 Q 100 240, 400 230 Q 480 222, 480 195"
+            fill="none" stroke="#a1a1aa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-soft)"/>
+      <text x="250" y="252" fill="#71717a" font-size="11" text-anchor="middle" font-weight="600">recompile (escape hatch)</text>
+      <text x="250" y="266" fill="#71717a" font-size="9" text-anchor="middle">delete wiki/, re-derive from sources + CLAUDE.md</text>
+    </svg>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="color: var(--wiki);">ingest</h3>
+      <p style="font-size: 14px; color: var(--ink);">A new source appeared in <code>sources/</code>.</p>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        The agent reads it, generates a <code>*.meta.md</code> sibling if
+        missing, decides whether to extend an existing page or create a new
+        one, makes the change, and appends to <code>log.md</code>.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--wiki);">query</h3>
+      <p style="font-size: 14px; color: var(--ink);">You ask a question.</p>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        The agent searches <code>wiki/</code> first, falls back to
+        <code>sources/</code>, and surfaces gaps as new
+        <code>questions/</code> entries. Always cites.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--wiki);">lint</h3>
+      <p style="font-size: 14px; color: var(--ink);">Periodic hygiene pass.</p>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        Checks: every page has a tagline, ≥ 2 outgoing links, a
+        <code>## Sources</code> block, a <code>## Continue reading</code>
+        footer; no orphans; no dead links; <code>log.md</code> is dated.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--wiki);">recompile</h3>
+      <p style="font-size: 14px; color: var(--ink);">The escape hatch.</p>
+      <p style="font-size: 14px; color: var(--ink-soft);">
+        Delete <code>wiki/</code>, re-derive every page from
+        <code>sources/</code> + <code>CLAUDE.md</code>. A reproducibility
+        check — proves your sources can fully regenerate the wiki.
+      </p>
+    </div>
+  </div>
+
+  <hr>
+  <h2>The schema is the contract</h2>
+  <p>
+    <code>CLAUDE.md</code> (or <code>AGENTS.md</code>) is the file the agent
+    reads first. It defines what counts as a thing, what a page looks like,
+    and how the operations work. Here's the concept-page template from the
+    starter:
+  </p>
+
+  <pre><code># &lt;Concept Name&gt;
+
+&gt; &lt;single-sentence summary that doubles as a tagline&gt;
+
+## What it is
+&lt;2–6 sentence explanation, plain English first&gt;
+
+## Why it matters
+&lt;the practical or theoretical consequence&gt;
+
+## Key ideas
+- bullet
+- bullet
+
+## Related
+- [[concepts/&lt;other&gt;]]
+- [[entities/&lt;paper-or-person&gt;]]
+
+## Sources
+- [[sources/&lt;file&gt;]] — &lt;one-line note&gt;
+
+## Continue reading
+- **&lt;short reader-facing label&gt;** → [[&lt;target-page&gt;]]
+- **&lt;short reader-facing label&gt;** → [[&lt;target-page&gt;]]</code></pre>
+
+  <p>
+    There are five page templates total — <strong>concept, entity, synthesis,
+    comparison, question</strong> — each with its own shape. The schema also
+    declares style rules (kebab-case filenames, ISO dates, no claim without
+    a source), forbidden behaviors (don't edit sources, don't invent
+    citations), and the four operations.
+  </p>
+
+  <h3 style="margin-top: 28px;">Editing the schema is the loop</h3>
+  <p>
+    After your first ingest, you'll notice things you'd have done differently
+    — a page split where you'd have merged, the tone is off, a template
+    doesn't fit your domain. <strong>Don't fix the wiki by hand.</strong>
+    Edit <code>CLAUDE.md</code> instead, ask the agent to re-ingest, and the
+    next pass produces what you wanted.
+  </p>
+  <p style="color: var(--ink-soft);">
+    The schema is the contract; the wiki is its output. Iterating on the
+    schema is how a generic template becomes <em>your</em> wiki.
+  </p>
+
+  <hr>
+  <h2>What a page actually looks like</h2>
+  <p>This is what an agent renders, page by page — clean markdown with a
+  blockquote tagline, structured sections, cross-links, citations, and a
+  navigational footer.</p>
+
+  <div class="page-mockup">
+    <div class="page-h1">LLM-as-Judge</div>
+    <blockquote>
+      Using a large language model to score the outputs of other models —
+      fast, cheap, and shockingly correlated with human raters when
+      designed well.
+    </blockquote>
+    <div class="page-h2">What it is</div>
+    <p>The technique of asking an LLM (often a stronger or more expensive
+    one than the model being evaluated) to grade candidate outputs
+    against criteria you specify. Replaces or supplements human rating
+    in production eval pipelines.</p>
+    <div class="page-h2">Why it matters</div>
+    <p>Production LLMs need continuous eval, and human rating doesn't
+    scale. A well-designed LLM-judge correlates with humans at roughly
+    <a href="#" class="wlink">~1% of the cost</a>, enabling daily eval
+    runs you'd never afford otherwise. The
+    <a href="#" class="wlink">golden-dataset</a> is the bedrock; the
+    judge is the multiplier.</p>
+    <div class="page-h2">Related</div>
+    <ul>
+      <li><a href="#" class="wlink">[[concepts/golden-dataset]]</a> — the labelled benchmark you trust</li>
+      <li><a href="#" class="wlink">[[concepts/evaluator-drift]]</a> — when the judge changes its mind</li>
+      <li><a href="#" class="wlink">[[concepts/eval-design]]</a> — what makes a benchmark useful</li>
+    </ul>
+    <div class="page-h2">Sources</div>
+    <ul>
+      <li><a href="#" class="wlink">[[sources/zheng-judging-llm-as-a-judge-paper]]</a> §2, §4</li>
+      <li><a href="#" class="wlink">[[sources/eval-best-practices-notes]]</a> turns 12, 14</li>
+    </ul>
+    <div class="page-h2">Continue reading</div>
+    <ul>
+      <li><strong>The golden-dataset prerequisite</strong> → <a href="#" class="wlink">[[concepts/golden-dataset]]</a></li>
+      <li><strong>What goes wrong: evaluator drift</strong> → <a href="#" class="wlink">[[concepts/evaluator-drift]]</a></li>
+    </ul>
+  </div>
+
+  <p style="color: var(--ink-soft); font-size: 14px;">
+    Every page follows this shape. The agent writes them; you read them; the
+    cross-links form the graph you see in Obsidian.
+  </p>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 4 · USE CASES                                                  -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" data-tab="4">
+
+  <h2>The pattern's sweet spot</h2>
+  <p>
+    LLM-Wikis win in a specific regime: a corpus you actually care about
+    (not too big), questions that recur (not one-off), and an audience
+    that includes humans. Below are the use cases I've seen pay off,
+    grouped by who they serve.
+  </p>
+
+  <h2>Personal</h2>
+  <p class="hint">A topic you're learning, mastering, or thinking through over weeks or months.</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Literature review</h3>
+      <p style="font-size: 14px;">Papers in a domain, synthesized as you go.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> papers, conference talks, blog posts<br>
+        <strong style="color: var(--ink);">Sample pages:</strong> concepts for techniques, entities for papers and authors, syntheses across themes
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Research area</h3>
+      <p style="font-size: 14px;">A topic you're mastering across textbooks and papers.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> textbooks, papers, blog series, YouTube talks<br>
+        <strong style="color: var(--ink);">Sample pages:</strong> concept pages for ideas, entity pages for key figures, open questions
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Onboarding to a new domain</h3>
+      <p style="font-size: 14px;">New job, new stack, new sub-field. The wiki becomes your ramp-up artifact.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> company docs, runbooks, Slack threads<br>
+        <strong style="color: var(--ink);">Sample pages:</strong> concepts for jargon, entities for systems and people, syntheses for "how we do X"
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Long-running personal interest</h3>
+      <p style="font-size: 14px;">A hobby with a literature: climbing, fermentation, tea, Go.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> books, blog posts, podcast notes, your own experiments<br>
+        <strong style="color: var(--ink);">Sample pages:</strong> techniques, gear and equipment, people in the field
+      </p>
+    </div>
+  </div>
+
+  <h2>Team / enterprise</h2>
+  <p class="hint">The pattern as a <em>context layer</em> for an AI-augmented data or engineering team.</p>
+
+  <div class="three">
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Domain context</h3>
+      <p style="font-size: 14px;">The team's shared understanding of <em>what this thing actually is</em>.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> PRDs, design docs, customer interviews<br>
+        <strong style="color: var(--ink);">Pages:</strong> business concepts, system entities, decision syntheses
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Playbooks</h3>
+      <p style="font-size: 14px;">Runbooks, alert response, on-call procedures.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> alert configs, postmortems, on-call notes<br>
+        <strong style="color: var(--ink);">Pages:</strong> per-alert playbook, per-system runbook, cross-cutting "common failure modes"
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Incident postmortems</h3>
+      <p style="font-size: 14px;">Postmortems become sources; the wiki finds patterns across them.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> postmortem docs<br>
+        <strong style="color: var(--ink);">Pages:</strong> per-incident, per-system, recurring failure modes
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">ML experiment &amp; ablation log</h3>
+      <p style="font-size: 14px;">Every experiment is a source; the wiki synthesizes "what we've learned."</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> experiment writeups, eval reports, weights / metrics<br>
+        <strong style="color: var(--ink);">Pages:</strong> per-dataset, per-architecture, lessons-learned syntheses
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Architecture decisions (ADRs)</h3>
+      <p style="font-size: 14px;">Proposals are sources; the wiki tracks themes, reversals, contradictions.</p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> ADR docs, RFCs<br>
+        <strong style="color: var(--ink);">Pages:</strong> per-decision, themed syntheses, contradictions
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); font-size: 15px; margin-top: 0;">Customer / user feedback</h3>
+      <p style="font-size: 14px;">Tickets, interviews, NPS → a living <em>"why customers ask about X."</em></p>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 8px 0 0;">
+        <strong style="color: var(--ink);">Sources:</strong> support tickets, interview notes, survey responses<br>
+        <strong style="color: var(--ink);">Pages:</strong> per-feature, per-complaint, per-segment
+      </p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Scaling up — what if I have multiple topics?</h2>
+  <p>The LLM-Wiki pattern doesn't care how many wikis you have. The choice is one of relationship: are your wikis <strong>independent</strong>, or are they <strong>sub-topics of a larger theme</strong>?</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="color: var(--ink); margin-top: 0;">If wikis are independent</h3>
+      <p style="font-size: 14px;">Different domains that don't reference each other. E.g., your work wiki, a hobby wiki, a side-project wiki.</p>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin-top: 12px;">
+        <strong style="color: var(--ink);">Setup:</strong> each is its own Obsidian vault.<br>
+        <strong style="color: var(--ink);">Linking:</strong> none across vaults — switch with Obsidian's vault picker.<br>
+        <strong style="color: var(--ink);">Graph:</strong> one per vault — they don't see each other.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3 style="color: var(--wiki); margin-top: 0;">If wikis are sub-topics of one theme <span style="font-weight: 400; color: var(--ink-soft); font-size: 12.5px;">— more common</span></h3>
+      <p style="font-size: 14px;">Multiple narrow wikis that share a broader theme. E.g., an <em>LLM Wiki</em> vault containing <em>Ontology</em>, <em>RAG</em>, and <em>Distributed systems</em> sub-wikis.</p>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin-top: 12px;">
+        <strong style="color: var(--ink);">Setup:</strong> one Obsidian vault with multiple sub-wiki folders, each with its own <code>CLAUDE.md</code>.<br>
+        <strong style="color: var(--ink);">Linking:</strong> <code>[[wiki-links]]</code> resolve across sub-wikis natively.<br>
+        <strong style="color: var(--ink);">Graph:</strong> unified — color-coded by sub-wiki folder.
+      </p>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 32px;">How sub-topic wikis look on disk</h3>
+  <p>The most common case — one vault, multiple sub-wikis, with a hand-curated <code>README.md</code> at the top:</p>
+
+  <pre><code>LLM Wiki/                       ← Obsidian vault root
+├── .obsidian/                  ← vault config (colors, plugins)
+├── README.md                   ← hand-curated hub: "what's here"
+├── Ontology/                   ← sub-wiki 1
+│   ├── CLAUDE.md
+│   ├── sources/
+│   └── wiki/
+├── RAG/                        ← sub-wiki 2
+│   ├── CLAUDE.md
+│   ├── sources/
+│   └── wiki/
+└── Distributed-Systems/        ← sub-wiki 3
+    ├── CLAUDE.md
+    ├── sources/
+    └── wiki/</code></pre>
+
+  <p style="font-size: 14px;">Three ways to cross-link inside this structure:</p>
+  <ul style="font-size: 14px;">
+    <li><strong>Basename match:</strong> <code>[[retrieval-augmented-generation]]</code> — Obsidian finds it anywhere in the vault.</li>
+    <li><strong>Explicit path:</strong> <code>[[../RAG/wiki/concepts/retrieval-augmented-generation]]</code> — unambiguous, robust against renames.</li>
+    <li><strong>Hub navigation:</strong> the top-level <code>README.md</code> lists each sub-wiki with a one-line description.</li>
+  </ul>
+
+  <div class="callout">
+    <strong>How the agent handles it:</strong> when you <code>cd</code> into a sub-wiki folder, the agent reads that sub-wiki's <code>CLAUDE.md</code>. Each sub-wiki has its own independent ingest / query / lint loop. Sub-wikis don't talk to each other agentically — only through Obsidian's link resolution.
+  </div>
+
+  <hr>
+
+  <h2>When NOT to use it</h2>
+  <p>The wiki isn't always the right tool. Where it loses:</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="font-size: 15px; color: var(--rag); margin-top: 0;">Very large corpora</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 6px 0 0;">
+        (&gt; ~1000 sources). Vector RAG scales better — synthesis-at-ingest gets expensive at that scale.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="font-size: 15px; color: var(--rag); margin-top: 0;">Pure lookup / search</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 6px 0 0;">
+        "Find me the doc that says X." Wiki transformations get in the way of raw retrieval.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="font-size: 15px; color: var(--rag); margin-top: 0;">Highly dynamic data</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 6px 0 0;">
+        Real-time prices, logs, telemetry. Wikis are for slow-changing knowledge.
+      </p>
+    </div>
+    <div class="panel">
+      <h3 style="font-size: 15px; color: var(--rag); margin-top: 0;">Regulated verbatim retrieval</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 6px 0 0;">
+        Content needing exact-quote provenance. The transformation step complicates audit.
+      </p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>A worked example</h2>
+  <p>Concretely: what does an ML team's "experiment log" wiki look like after a few months of use?</p>
+
+  <div class="two">
+    <div>
+      <h3 style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Sources you drop in</h3>
+      <pre style="margin-top: 8px;"><code>sources/
+├── 2026-04-15-baseline-finetune.md
+├── 2026-04-22-lr-sweep.md
+├── 2026-05-03-data-cleaning.md
+├── 2026-05-10-attention-ablation.md
+├── 2026-05-18-eval-redesign.md
+└── 2026-05-24-instruction-tuning.md</code></pre>
+    </div>
+
+    <div>
+      <h3 style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Pages the agent builds</h3>
+      <pre style="margin-top: 8px;"><code>wiki/
+├── concepts/
+│   ├── learning-rate-tuning.md
+│   ├── data-quality-effects.md
+│   └── attention-head-pruning.md
+├── entities/
+│   └── datasets/training-set-v2.md
+├── syntheses/
+│   └── what-actually-moves-the-needle.md
+├── comparisons/
+│   └── full-ft-vs-lora.md
+└── questions/
+    └── why-did-attention-ablation-help.md</code></pre>
+    </div>
+  </div>
+
+  <p>
+    Instead of six disconnected experiment writeups in Notion that nobody
+    re-reads, the team gets a navigable wiki where <em>"what we've learned
+    about X"</em> is a single page with citations back to the underlying
+    experiments. New hires read the wiki; experienced team members keep
+    adding sources; the synthesis is always current.
+  </p>
+
+  <div class="callout">
+    <strong>The shape of the win:</strong> the wiki turns episodic
+    knowledge (one writeup per experiment) into accumulating knowledge
+    (durable, cross-referenced understanding). The cost is upfront LLM
+    work at ingest; the payoff is every future question that doesn't
+    have to re-derive the answer.
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 5 · TRY IT                                                     -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" data-tab="5">
+
+  <h2>You can start in five minutes</h2>
+  <p>
+    A working LLM-Wiki needs three things: a markdown editor (for reading),
+    an LLM agent (for writing), and the template repo (for the schema). All
+    three are free and take a couple of minutes each.
+  </p>
+
+  <h3 style="margin-top: 28px;">Prerequisites</h3>
+  <div class="two">
+    <div class="panel">
+      <h3 style="font-size: 15px; color: var(--wiki); margin-top: 0;">An LLM agent</h3>
+      <p style="font-size: 14px; color: var(--ink);">Any agent that reads a project-level instructions file:</p>
+      <ul style="font-size: 14px; color: var(--ink-soft); margin: 8px 0;">
+        <li><strong>Claude Code</strong> (recommended)</li>
+        <li>Codex CLI</li>
+        <li>Cursor</li>
+        <li>OpenClaw</li>
+      </ul>
+      <p style="font-size: 13px; color: var(--ink-soft);">The agent reads <code>CLAUDE.md</code> on open and behaves accordingly.</p>
+    </div>
+    <div class="panel">
+      <h3 style="font-size: 15px; color: var(--wiki); margin-top: 0;">A markdown editor</h3>
+      <p style="font-size: 14px; color: var(--ink);"><strong>Obsidian</strong> (recommended): native <code>[[wiki-links]]</code>, backlinks, graph view.</p>
+      <p style="font-size: 14px; color: var(--ink-soft); margin-top: 8px;">VS Code, vim, or any markdown reader works for individual pages.</p>
+      <p style="font-size: 13px; color: var(--ink-soft);">Optional: git, if you want a version history of how the wiki evolved.</p>
+    </div>
+  </div>
+
+  <hr>
+  <h2>The five steps</h2>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Clone the template</h3>
+        <pre style="margin-top: 8px;"><code>git clone https://github.com/hong-chu/llm-wiki-starter.git my-wiki
+cd my-wiki</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Pick a topic</h3>
+        <p>Narrow enough that ~10 sources can cover it meaningfully.
+          <em>"Retrieval-augmented generation"</em> works;
+          <em>"machine learning"</em> does not.
+          Good directions: a research area you're learning, your team's runbooks,
+          a hobby with a literature, a sub-domain at work.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Customize <code>CLAUDE.md</code></h3>
+        <p>
+          Open <code>CLAUDE.md</code> and replace the <code>TL;DR for the
+          agent</code> block with one sentence describing your topic. This is
+          the only edit required to make the template yours; everything else
+          in the schema you can iterate on after the first ingest.
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Drop 2–3 starter sources into <code>sources/</code></h3>
+        <p>
+          PDFs, blog posts pasted as <code>.md</code>, transcripts, your own
+          notes — anything you've already engaged with and want to remember.
+          The agent will read each one on the first ingest.
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>Open the folder in your agent and say <code>ingest</code></h3>
+        <p>
+          The agent reads <code>sources/</code>, decides what pages to
+          create, and starts filling out <code>wiki/</code>. A first ingest
+          of 2–3 sources typically produces 5–10 wiki pages. Read what came
+          out — some will be exactly right; some will surprise you.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout">
+    <strong>Workshop participants:</strong>
+    your pre-work is steps 1 and 2. We'll do steps 3–5 together during the
+    session — the first ingest is a shared moment, and you'll get more out
+    of it that way. See <a href="https://github.com/hong-chu/llm-wiki-starter/blob/main/WORKSHOP.md">WORKSHOP.md</a>
+    for the full pre-work checklist.
+  </div>
+
+  <hr>
+  <h2>What you'll have at the end</h2>
+  <p>A folder you own, full of markdown pages an agent wrote for you,
+    cross-linked into a navigable graph you can browse in Obsidian. You add
+    sources over time; the wiki compounds. The schema co-evolves with your
+    taste.</p>
+
+  <p>Specifically, after a few sessions:</p>
+  <ul>
+    <li>A working <code>CLAUDE.md</code> tuned to your domain</li>
+    <li>10–50 wiki pages covering concepts, entities, syntheses, comparisons, and open questions</li>
+    <li>A coloured knowledge graph in Obsidian that's <em>readable</em> at a glance</li>
+    <li>A dated change log proving every claim traces back to a source</li>
+    <li>Portable, vendor-free, and entirely yours</li>
+  </ul>
+
+  <h2>Don't want to clone?</h2>
+  <p>If you'd rather build a wiki from scratch without cloning, open Claude
+    Code in an empty folder and paste this prompt:</p>
+
+  <pre><code>Scaffold an LLM-wiki for the topic &lt;YOUR TOPIC&gt;, following the
+pattern in Andrej Karpathy's gist
+(https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
+Create:
+
+- CLAUDE.md (the schema, with page templates for concepts/entities/
+  syntheses/comparisons/questions and ingest/query/lint workflows)
+- An empty sources/ directory I'll fill in
+- An empty wiki/ tree: concepts/, entities/, syntheses/, comparisons/,
+  questions/, plus index.md, overview.md, log.md
+
+Use kebab-case.md filenames, [[wiki-links]] for cross-references, and
+end every page with a ## Sources section.</code></pre>
+
+  <p style="color: var(--ink-soft);">The agent will create the structure
+    from scratch. The result should look like the directory tree from Tab 01.</p>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 6 · BEST PRACTICES                                             -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" data-tab="6">
+
+  <h2>Best practices</h2>
+  <p class="hint">Disciplines that separate "neat trick" from "actual living wiki." These come from running the pattern repeatedly and watching what fails.</p>
+
+  <h2>Pick the right topic</h2>
+  <p>The single biggest predictor of wiki health is topic narrowness. Most "my wiki isn't working" stories trace back to a topic that's too broad.</p>
+
+  <p style="font-size: 14px; color: var(--ink-soft); margin-bottom: 10px;">Each good topic is a narrow slice of the corresponding bad one. Same row → same domain, different scope.</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="color: var(--wiki); margin-top: 0;">Good topics <span style="font-weight: 400; color: var(--ink-soft); font-size: 12.5px;">— narrow</span></h3>
+      <ul style="font-size: 14px;">
+        <li><em>Prompt evaluation methods</em></li>
+        <li><em>Database query optimization</em></li>
+        <li><em>Distributed consensus algorithms</em></li>
+        <li><em>My team's deployment pipeline</em></li>
+      </ul>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 10px 0 0;">You can name 5–10 sources you'd actually want to remember.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">Bad topics <span style="font-weight: 400; color: var(--ink-soft); font-size: 12.5px;">— too broad</span></h3>
+      <ul style="font-size: 14px;">
+        <li><em>Machine learning</em></li>
+        <li><em>Databases</em></li>
+        <li><em>Distributed systems</em></li>
+        <li><em>DevOps</em></li>
+      </ul>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 10px 0 0;">The agent can't decide what belongs — wiki sprawls and decays.</p>
+    </div>
+  </div>
+
+  <h2>Ingest discipline</h2>
+  <p>The first ingest sets the tone for everything that follows. Treat it like a calibration step, not the finish line.</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="color: var(--wiki); margin-top: 0;">Do</h3>
+      <ul style="font-size: 14px;">
+        <li>Start with <strong>2–3 sources</strong>, not 50</li>
+        <li><strong>Read each source yourself</strong> before ingesting</li>
+        <li>Read every page the agent produced</li>
+        <li>Update <code>CLAUDE.md</code> before adding more sources</li>
+        <li>Re-ingest after schema changes</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">Don't</h3>
+      <ul style="font-size: 14px;">
+        <li>Batch-ingest a backlog of 50 sources</li>
+        <li>Skip reading the agent's output</li>
+        <li>Edit individual pages by hand to "fix" them</li>
+        <li>Ingest something you haven't read yet</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Page hygiene — what every page should have</h2>
+  <p>This list is exactly what <code>lint</code> checks. Internalize it and your wiki passes lint by default.</p>
+
+  <div class="panel">
+    <ul style="margin: 0; font-size: 14px; line-height: 1.95;">
+      <li><strong>Blockquote tagline</strong> right after the H1 — a single sentence that doubles as a summary (≤ 25 words)</li>
+      <li><strong>At least 2 outgoing <code>[[wiki-links]]</code></strong> — the page connects to neighbors</li>
+      <li><strong><code>## Sources</code> section</strong> with citations back to <code>sources/</code></li>
+      <li><strong><code>## Continue reading</code> footer</strong> with 2–3 curated next-page links</li>
+      <li><strong>Kebab-case filename</strong> — <code>llm-as-judge.md</code>, not <code>LLM_as_Judge.md</code></li>
+      <li><strong>One idea per page</strong> — split if the page grows past ~600 lines</li>
+    </ul>
+  </div>
+
+  <h2>Schema is the loop</h2>
+  <p>The single most-important discipline. Master this and the wiki maintains itself.</p>
+
+  <div class="punchline">
+    <strong>The rule:</strong> when something feels off, edit <code>CLAUDE.md</code>, not the page. The schema is the contract; the wiki is its output. Hand-editing the output is fighting your own agent.
+  </div>
+
+  <p style="font-size: 14.5px;">Workflow when a page disappoints:</p>
+  <ol style="font-size: 14.5px; line-height: 1.7;">
+    <li>Identify the <em>rule</em> that produced the issue (e.g., <em>"the agent split this concept across two pages when it should be one"</em>)</li>
+    <li>Update <code>CLAUDE.md</code> to fix the rule</li>
+    <li>Ask the agent to re-ingest the relevant sources</li>
+    <li>Verify the new output matches your taste</li>
+  </ol>
+
+  <p style="font-size: 14px; color: var(--ink-soft);">
+    The agent doesn't change <code>CLAUDE.md</code> on its own. That part stays human-initiated — the contract is yours.
+  </p>
+
+  <h2>Source rules</h2>
+  <div class="panel">
+    <ul style="margin: 0; font-size: 14px; line-height: 1.95;">
+      <li><strong>Sources are immutable.</strong> If you find an error, add a correction file — don't edit the original.</li>
+      <li><strong>Every source gets a <code>*.meta.md</code> sibling</strong> with title, author, date, why-it-matters.</li>
+      <li><strong>Filenames:</strong> <code>YYYY-MM-DD-short-slug.ext</code> (e.g., <code>2026-04-15-mmlu-paper.pdf</code>).</li>
+      <li><strong>One source = one file</strong> (or one folder if it's multi-part).</li>
+      <li><strong>The agent reads <code>sources/</code> but never writes there.</strong> Period.</li>
+    </ul>
+  </div>
+
+  <h2>Lint cadence</h2>
+  <p>Run <code>lint</code> weekly or after each major ingest. Two flavors of things it should catch:</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="margin-top: 0;">Structural</h3>
+      <ul style="font-size: 14px;">
+        <li>Orphan pages (unreachable from <code>index.md</code> in ≤ 2 hops)</li>
+        <li>Dead <code>[[wiki-links]]</code> (target doesn't exist)</li>
+        <li>Pages missing required sections</li>
+        <li>Filename violations (spaces, uppercase)</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top: 0;">Quality</h3>
+      <ul style="font-size: 14px;">
+        <li>Stubs older than 30 days (slap a <code>**TODO**</code> banner)</li>
+        <li>Pages with no <code>## Sources</code></li>
+        <li><code>log.md</code> drift (last entry &gt; 2 weeks old)</li>
+        <li>Pages with only one outgoing link</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Anti-patterns to avoid</h2>
+  <p>The six most common ways people break their own wiki:</p>
+
+  <div class="three">
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">1. Wiki-everything</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">Using the pattern for one-off questions or unbounded topics. Use it for <em>specific, bounded, recurring</em> domains only.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">2. Hand-editing pages</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">You fight your own agent. Edit <code>CLAUDE.md</code> and re-ingest instead.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">3. Vendor lock-in</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">Letting your wiki live inside Notion AI or ChatGPT memory. Keep it as portable markdown.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">4. Silent edits</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">Every change should append to <code>log.md</code>. Otherwise the audit trail breaks and trust evaporates.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">5. Averaging contradictions</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">When sources disagree, capture both in a <code>## Contradictions</code> section. Don't silently pick one or split the difference.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">6. Skipping the first read</h3>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">Trusting the first ingest blindly. You must read what the agent wrote and iterate the schema — otherwise mediocre output becomes "fact."</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>The discipline summary:</strong> <em>narrow topic, immutable sources, schema-as-the-loop, weekly lint, log everything.</em> Do those five and the wiki maintains itself indefinitely.
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- TAB 7 · DEEPER LENS (OPTIONAL)                                     -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" data-tab="7">
+
+  <h2>A deeper lens: ontology &amp; VSM</h2>
+  <p class="hint">Optional — for the curious. Two frameworks from outside the LLM world (philosophy and cybernetics) that sharpen how you think about what an LLM-Wiki <em>is</em> and what it's <em>missing</em>.</p>
+
+  <div class="callout">
+    <strong>You don't need this material</strong> to use the LLM-Wiki pattern. Tabs 01–05 will get you a working wiki. But once you have one, the two lenses below give you a precise way to think about where the pattern stops short — and the VSM analysis at the bottom shows you exactly which capabilities are missing and how to add them.
+  </div>
+
+  <h2>Ontology — five lenses on what's real</h2>
+  <p>Ontology is the branch of philosophy that asks <em>"what exists?"</em>. Five canonical answers have been proposed over the last 2,500 years. They aren't steps in a hierarchy — they're rival frames, each catching what the others miss.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Lens</th><th>What it sees</th><th>Wiki reading</th></tr></thead>
+      <tbody>
+        <tr><td class="label">Substance</td><td>Things with properties <span style="color: var(--ink-soft);">(Aristotle)</span></td><td>Files, the vault, the markdown itself</td></tr>
+        <tr><td class="label">Process</td><td>Events, flow <span style="color: var(--ink-soft);">(Whitehead, Heraclitus)</span></td><td>Ingest, query, lint — the live activity</td></tr>
+        <tr><td class="label">Relational</td><td>Connections, networks <span style="color: var(--ink-soft);">(Leibniz)</span></td><td>The link graph between pages</td></tr>
+        <tr><td class="label">Informational</td><td>Patterns of distinction <span style="color: var(--ink-soft);">(Wheeler)</span></td><td><code>CLAUDE.md</code>, schemas, conventions</td></tr>
+        <tr><td class="label">Phenomenological</td><td>What shows up for a being <span style="color: var(--ink-soft);">(Heidegger)</span></td><td>You — your taste, your refusal, what you care about</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The river metaphor: water (substance), flow (process), the network of banks and rain (relational), the pattern of differences (informational), the river <em>as it shows up to someone on the bank</em> (phenomenological). All five descriptions are true; none is sufficient alone.</p>
+
+  <div class="punchline">
+    <strong>The wiki uses all five.</strong> Substance gives you a folder; process gives you ingest; relational gives you cross-links; informational gives you the schema; phenomenological is the human deciding what's worth a page in the first place. A wiki that uses only one lens is structurally incomplete.
+  </div>
+
+  <h2>VSM — six functions a system needs to stay viable</h2>
+  <p>Stafford Beer (1926–2002) was a British cybernetician. He asked a different question: <em>"what does any system — a cell, a team, a nation — need to stay alive in its environment?"</em> His answer is the <strong>Viable System Model</strong>: six interacting functions. Drop any one and the system dies in a specific, recognizable way.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Function</th><th>Kitchen analogy</th></tr></thead>
+      <tbody>
+        <tr><td class="label">S1 Operations</td><td>Doing the work</td><td>Line cooks cooking</td></tr>
+        <tr><td class="label">S2 Coordination</td><td>Preventing collisions</td><td>The expediter</td></tr>
+        <tr><td class="label">S3 Regulation</td><td>Optimizing current service</td><td>Head chef adjusting on the fly</td></tr>
+        <tr><td class="label">S3* Audit</td><td>Independent inspection</td><td>Food-safety inspector walking through</td></tr>
+        <tr><td class="label">S4 Scanning</td><td>Watching the world</td><td>GM tracking trends, weather, reservations</td></tr>
+        <tr><td class="label">S5 Identity</td><td>What this system is <em>for</em></td><td>The owner's vision for the restaurant</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Applying VSM to LLM-Wiki</h2>
+  <p>Run LLM-Wiki through the framework. What does it cover, and what does it miss?</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>What it would do in a wiki</th><th>LLM-Wiki coverage</th></tr></thead>
+      <tbody>
+        <tr><td class="label">S1 Operations</td><td>Ingest, query, lint</td><td style="color: var(--wiki); font-weight: 600;">✓ Present</td></tr>
+        <tr><td class="label">S2 Coordination</td><td><code>index.md</code>, schema conventions</td><td style="color: var(--wiki); font-weight: 600;">✓ Present</td></tr>
+        <tr><td class="label">S3 Regulation</td><td>The lint operation, schema-as-the-loop</td><td style="color: var(--wiki); font-weight: 600;">✓ Present</td></tr>
+        <tr><td class="label">S3* Audit</td><td><code>log.md</code>, citations on every page</td><td style="color: var(--wiki); font-weight: 600;">✓ Present</td></tr>
+        <tr><td class="label">S4 Scanning</td><td>Proactively watching the world for new sources</td><td style="color: var(--rag); font-weight: 600;">✗ Absent by design</td></tr>
+        <tr><td class="label">S5 Identity</td><td>What this wiki is <em>for</em>, what it refuses</td><td style="color: var(--kg); font-weight: 600;">⚠️ Implicit only</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>What's missing — and how to add it</h2>
+  <p>LLM-Wiki gives you S1–S3* out of the box. To build a fuller system, two layers need to be added.</p>
+
+  <div class="two">
+    <div class="panel">
+      <h3 style="color: var(--rag); margin-top: 0;">S4 — Scanning <span style="font-weight: 400; color: var(--ink-soft); font-size: 13px;">(absent)</span></h3>
+      <p style="font-size: 14px;">LLM-Wiki doesn't watch the world. Sources are dropped in by hand. To add S4:</p>
+      <ul style="font-size: 14px; color: var(--ink-soft);">
+        <li>Cron jobs that scrape RSS, arXiv, papers-with-code</li>
+        <li>Heartbeats that ask <em>"anything new on X?"</em></li>
+        <li>Webhooks from Slack, GitHub, your inbox</li>
+      </ul>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">Tools like <em>OpenClaw</em> bring S4. Claude Code by itself is reactive — it waits for you.</p>
+    </div>
+    <div class="panel">
+      <h3 style="color: var(--kg); margin-top: 0;">S5 — Identity <span style="font-weight: 400; color: var(--ink-soft); font-size: 13px;">(implicit)</span></h3>
+      <p style="font-size: 14px;">LLM-Wiki's S5 is hidden inside <code>CLAUDE.md</code> and your curation choices. To make it explicit:</p>
+      <ul style="font-size: 14px; color: var(--ink-soft);">
+        <li>Add an <code>identity.md</code> at the root</li>
+        <li>State what the wiki is <em>for</em></li>
+        <li>State what it <em>refuses</em> to cover</li>
+        <li>Add a weekly ritual to revisit and revise</li>
+      </ul>
+      <p style="font-size: 13.5px; color: var(--ink-soft);">Without explicit S5, the wiki drifts: capable but directionless.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>The autonomy ladder — L0 to L4</h2>
+  <p>Removing VSM layers from the top down produces a hierarchy of autonomy. A practical framing for evaluating any AI infra project, not just wikis:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Level</th><th>What's lost</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td class="label">L4</td><td>—</td><td>All layers present · full cybernetic autonomy</td></tr>
+        <tr><td class="label">L3</td><td>– S5</td><td>Capable but drifts · no direction</td></tr>
+        <tr><td class="label">L2</td><td>– S5, S4, S3*</td><td>No outside sense, no self-inspection</td></tr>
+        <tr><td class="label">L1</td><td>– S5, S4, S3*, S3, S2</td><td>Uncoordinated execution</td></tr>
+        <tr><td class="label">L0</td><td>Only S1 remnants</td><td>Not a system · just actions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Most "AI + notes" stacks today sit at L2–L3. LLM-Wiki out of the box is roughly <strong>L3</strong>: S1–S3* present, but no S4 watchers and an implicit S5. Adding watchers and an explicit <code>identity.md</code> lifts you to <strong>L4</strong>.</p>
+
+  <div class="callout">
+    <strong>Diagnostic:</strong> <em>if your wiki is growing but you have no explicit <code>identity.md</code> and no scheduled watchers, your system is structurally L3 — capability without direction. Lots of energy, no compass.</em>
+  </div>
+
+  <hr>
+
+  <h2>The composite architecture</h2>
+  <p>Putting the lenses together: a complete <em>Personal OS</em> isn't LLM-Wiki alone. It's a composition of four pieces, each picked at its strongest.</p>
+
+  <ul style="line-height: 1.7;">
+    <li><strong>LLM-Wiki at the core</strong> — synthesized knowledge that compounds (covers S1, S2, S3, S3*)</li>
+    <li><strong>An agent runtime around it</strong> (OpenClaw-style, with heartbeats and webhooks) — adds S4</li>
+    <li><strong>An explicit <code>identity.md</code> on top</strong> — makes S5 first-class</li>
+    <li><strong>The human in the loop</strong> — the phenomenological lens: taste, refusal, weekly review</li>
+  </ul>
+
+  <h2>Where to dig deeper</h2>
+  <p>If this lens resonates, the worked example is the <strong>Ontology vault</strong> this page was generated from. It contains real pages on:</p>
+
+  <ul>
+    <li><code>concepts/ontology</code> — the five lenses, deepened</li>
+    <li><code>concepts/viable-system-model</code> — Beer's framework with the kitchen analogy and the autonomy ladder</li>
+    <li><code>concepts/triad</code> — the human-AI-fossil architecture</li>
+    <li><code>concepts/personal-os</code> — the composite stack</li>
+    <li><code>syntheses/personal-os-composite-architecture</code> — the full proposal</li>
+    <li><code>questions/what-belongs-in-identity-md</code> — the open thread on S5</li>
+  </ul>
+
+  <p style="color: var(--ink-soft);">Read those pages, then come back to <em>your own</em> wiki and ask: what's my S5? What's my S4? Which lens am I underusing? Those answers sharpen the pattern from "neat trick" to "real architecture."</p>
+
+</section>
+
+<footer>
+  Workshop reference page derived from your <code>Ontology</code> wiki —
+  see <code>wiki/syntheses/llm-wiki-vs-rag.md</code> and
+  <code>wiki/concepts/context-arrival-modes.md</code> for the underlying
+  source material.
+  Pattern inspired by
+  <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">
+    Andrej Karpathy's <em>LLM Wiki</em> gist (April 2026)</a>.
+</footer>
+
+<script>
+  function goTab(n) {
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === String(n));
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.dataset.tab === String(n));
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => goTab(btn.dataset.tab));
+  });
+</script>
+
+</body>
+</html>
